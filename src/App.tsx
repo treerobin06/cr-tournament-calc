@@ -7,6 +7,7 @@ import { CumulativeRankChart } from "@/components/CumulativeRankChart"
 import { DecayRatioChart } from "@/components/DecayRatioChart"
 import { DataTable } from "@/components/DataTable"
 import { MathInsights } from "@/components/MathInsights"
+import { SimulationPanel } from "@/components/SimulationPanel"
 import { computeDistribution } from "@/lib/math"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -115,6 +116,11 @@ function App() {
           {/* Math Insights */}
           <section>
             <MathInsights />
+          </section>
+
+          {/* Monte Carlo Simulation */}
+          <section>
+            <SimulationPanel params={params} />
           </section>
         </main>
       </div>
