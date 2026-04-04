@@ -2,6 +2,7 @@
  * 蒙特卡罗锦标赛模拟 Web Worker
  * 使用 xorshift128 PRNG、TypedArray 提升性能
  * 配对规则：胜场差 ≤ 1 才能配对（同场竞技原则）
+ * 支持多次模拟运行并汇总统计
  */
 
 // ---- xorshift128 PRNG ----
@@ -48,18 +49,33 @@ export interface SimConfig {
   fullPlayRatio: number
   kappa: number
   seed: number
+  runs: number    // 模拟次数（1~50，默认 1）
 }
 
 export interface SimResult {
-  winDistribution: number[]   // winDistribution[w] = 玩家数（w=0,1,2,...）
-  topPlayerWins: number[]     // 前 min(1000, N) 名玩家的胜场数（已按排名排序）
-  elapsed: number             // 毫秒
+  // 运行统计
+  runs: number
+  elapsed: number             // 总耗时（毫秒）
+  // 汇总统计
+  avgWinDistribution: number[]   // 各胜场的平均玩家数
+  avgTopPlayerWins: number[]     // 前 min(1000, N) 名的平均胜场
+  minTopPlayerWins: number[]     // 前 min(1000, N) 名的最小胜场（跨 run）
+  maxTopPlayerWins: number[]     // 前 min(1000, N) 名的最大胜场（跨 run）
+  // 冠军统计
+  championWins: { avg: number; min: number; max: number }
+  // 目标排名统计
+  targetRankWins: { avg: number; min: number; max: number }
 }
 
-// ---- 主模拟逻辑 ----
-function runSimulation(config: SimConfig): void {
-  const t0 = performance.now()
-  const rng = new XorShift128(config.seed)
+// ---- 单次模拟返回的原始数据 ----
+interface SingleRunResult {
+  winDistribution: number[]
+  topPlayerWins: number[]
+}
+
+// ---- 单次模拟逻辑 ----
+function runSingleSimulation(config: SimConfig, seed: number): SingleRunResult {
+  const rng = new XorShift128(seed)
 
   const N = config.playerCount
   // alpha% 玩家获得 lives 命，其余获得 lives-1 命
@@ -160,9 +176,9 @@ function runSimulation(config: SimConfig): void {
       }
     }
 
-    // 发送进度
+    // 发送进度（由外层调用者处理整体进度汇报）
     const progress = 1 - activeCount / N
-    self.postMessage({ type: 'progress', progress })
+    self.postMessage({ type: 'progress-inner', progress })
   }
 
   // ---- 计算结果 ----
@@ -174,9 +190,9 @@ function runSimulation(config: SimConfig): void {
   })
 
   // 胜场分布
-  let maxWins = 0
-  for (let i = 0; i < N; i++) if (wins[i] > maxWins) maxWins = wins[i]
-  const winDistribution = new Array<number>(maxWins + 1).fill(0)
+  let maxWinsVal = 0
+  for (let i = 0; i < N; i++) if (wins[i] > maxWinsVal) maxWinsVal = wins[i]
+  const winDistribution = new Array<number>(maxWinsVal + 1).fill(0)
   for (let i = 0; i < N; i++) winDistribution[wins[i]]++
 
   // 前 1000 名的胜场
@@ -186,15 +202,99 @@ function runSimulation(config: SimConfig): void {
     topPlayerWins.push(wins[allPlayers[i]])
   }
 
+  return { winDistribution, topPlayerWins }
+}
+
+// ---- 多次模拟汇总 ----
+function runMultiSimulation(config: SimConfig): void {
+  const t0 = performance.now()
+  const totalRuns = Math.max(1, Math.min(50, config.runs || 1))
+
+  // 收集每次运行的结果
+  const allResults: SingleRunResult[] = []
+
+  for (let r = 0; r < totalRuns; r++) {
+    // 每次 run 用不同的 seed
+    const seed = config.seed + r * 7919  // 用质数偏移确保差异
+    const result = runSingleSimulation(config, seed)
+    allResults.push(result)
+
+    // 汇报整体进度
+    self.postMessage({
+      type: 'progress',
+      progress: (r + 1) / totalRuns,
+    })
+  }
+
+  // ---- 汇总统计 ----
+  const topCount = Math.min(1000, config.playerCount)
+
+  // 找到最大的 winDistribution 长度
+  const maxDistLen = Math.max(...allResults.map(r => r.winDistribution.length))
+
+  // 平均胜场分布
+  const avgWinDistribution = new Array<number>(maxDistLen).fill(0)
+  for (const res of allResults) {
+    for (let i = 0; i < res.winDistribution.length; i++) {
+      avgWinDistribution[i] += res.winDistribution[i]
+    }
+  }
+  for (let i = 0; i < maxDistLen; i++) {
+    avgWinDistribution[i] = Math.round(avgWinDistribution[i] / totalRuns)
+  }
+
+  // 前 topCount 名的统计
+  const avgTopPlayerWins = new Array<number>(topCount).fill(0)
+  const minTopPlayerWins = new Array<number>(topCount).fill(Infinity)
+  const maxTopPlayerWins = new Array<number>(topCount).fill(-Infinity)
+
+  for (const res of allResults) {
+    for (let i = 0; i < topCount && i < res.topPlayerWins.length; i++) {
+      const w = res.topPlayerWins[i]
+      avgTopPlayerWins[i] += w
+      if (w < minTopPlayerWins[i]) minTopPlayerWins[i] = w
+      if (w > maxTopPlayerWins[i]) maxTopPlayerWins[i] = w
+    }
+  }
+  for (let i = 0; i < topCount; i++) {
+    avgTopPlayerWins[i] = Math.round((avgTopPlayerWins[i] / totalRuns) * 10) / 10
+    if (minTopPlayerWins[i] === Infinity) minTopPlayerWins[i] = 0
+    if (maxTopPlayerWins[i] === -Infinity) maxTopPlayerWins[i] = 0
+  }
+
+  // 冠军统计（第 0 名）
+  const championStats = {
+    avg: avgTopPlayerWins[0],
+    min: minTopPlayerWins[0],
+    max: maxTopPlayerWins[0],
+  }
+
+  // 目标排名统计（暂时用第 999 名，实际由前端根据 targetRank 索引取）
+  // 这里返回完整数组，前端根据 targetRank 提取
+  const targetRankStats = {
+    avg: 0,
+    min: 0,
+    max: 0,
+  }
+
   const elapsed = performance.now() - t0
 
   self.postMessage({
     type: 'result',
-    result: { winDistribution, topPlayerWins, elapsed } satisfies SimResult,
+    result: {
+      runs: totalRuns,
+      elapsed,
+      avgWinDistribution,
+      avgTopPlayerWins,
+      minTopPlayerWins,
+      maxTopPlayerWins,
+      championWins: championStats,
+      targetRankWins: targetRankStats,
+    } satisfies SimResult,
   })
 }
 
 // ---- 接收主线程消息 ----
 self.addEventListener('message', (e: MessageEvent<SimConfig>) => {
-  runSimulation(e.data)
+  runMultiSimulation(e.data)
 })

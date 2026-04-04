@@ -39,9 +39,12 @@ function App() {
   const playerSliderVal = inverseLogScale(params.playerCount, PLAYER_LOG_MIN, PLAYER_LOG_MAX)
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
+      {/* 顶部装饰渐变条 */}
+      <div className="h-1 bg-gradient-to-r from-amber-500 via-purple-500 to-amber-500" />
+
       {/* Header */}
-      <header className="px-8 py-7 border-b border-purple-900/20">
+      <header className="px-4 sm:px-8 py-7 border-b border-purple-900/20">
         <h1 className="text-4xl font-bold text-gold section-title">
           皇室战争锦标赛排名计算器
         </h1>
@@ -50,10 +53,10 @@ function App() {
         </p>
       </header>
 
-      {/* Main Layout */}
-      <div className="w-full px-8 py-6 flex gap-8">
+      {/* Main Layout — 窄屏垂直堆叠，宽屏侧边栏 */}
+      <div className="w-full px-4 sm:px-8 py-6 flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar: ParameterPanel */}
-        <aside className="w-80 shrink-0">
+        <aside className="w-full lg:w-80 shrink-0">
           <ParameterPanel params={params} onChange={setParams} />
         </aside>
 
@@ -123,7 +126,7 @@ function App() {
           </section>
 
           {/* 主要图表（分布 + 累计排名）— 全宽两列 */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div className="card-premium p-6">
               <DistributionChart distribution={distribution} targetWins={targetWins} />
             </div>
@@ -133,7 +136,7 @@ function App() {
           </section>
 
           {/* 次要图表（衰减比 + 热力图） */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div className="card-premium p-6">
               <DecayRatioChart distribution={distribution} />
             </div>

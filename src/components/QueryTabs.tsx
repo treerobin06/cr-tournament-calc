@@ -72,15 +72,15 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
   return (
     <div className="space-y-3">
-      {/* Tab Bar — Apple-style segmented control */}
-      <div className="flex gap-1 p-1.5 rounded-2xl bg-[#0c0b1a]">
+      {/* Tab Bar — 游戏风格分段控件 */}
+      <div className="flex gap-1 p-1.5 rounded-2xl bg-[#0c0b1a] border-b-2 border-amber-500/10">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`relative flex-1 py-3.5 px-6 rounded-xl font-semibold text-[15px] tracking-wide transition-all duration-300 cursor-pointer
               ${activeTab === tab.id
-                ? 'bg-gradient-to-b from-amber-500/20 to-amber-600/10 text-amber-400 shadow-lg border border-amber-500/30'
+                ? 'bg-gradient-to-b from-amber-500/25 to-amber-600/10 text-amber-400 shadow-lg border-2 border-amber-500/40 shadow-[inset_0_0_12px_rgba(245,158,11,0.08)]'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
               }`}
           >
@@ -161,7 +161,8 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
           <div className="space-y-1 max-h-64 overflow-y-auto">
             {winsToRankResult.probByWins
-              .filter((_, i) => i <= winsToRankResult.safeWins + 5)
+              .filter(r => r.probability > 0.001 && r.wins >= winsToRankResult.safeWins - 3)
+              .filter((_, i, arr) => i <= arr.findIndex(r => r.wins === winsToRankResult.safeWins) + 5)
               .map(({ wins, probability }) => (
                 <div key={wins} className="flex items-center gap-2">
                   <span className="w-16 text-xs text-right text-slate-400 shrink-0">

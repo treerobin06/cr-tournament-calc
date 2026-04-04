@@ -1,6 +1,7 @@
 /**
  * useSimulation - 管理 Web Worker 生命周期的 React Hook
  * 提供 run / cancel / running / progress / result 接口
+ * 支持多次模拟运行
  */
 import { useState, useRef, useCallback } from 'react'
 import type { SimConfig, SimResult } from '@/workers/simulation.worker'
@@ -49,6 +50,8 @@ export function useSimulation() {
       const data = e.data as { type: string; progress?: number; result?: SimResult }
       if (data.type === 'progress') {
         setState(prev => ({ ...prev, progress: data.progress ?? prev.progress }))
+      } else if (data.type === 'progress-inner') {
+        // 单次模拟内部进度（目前忽略，用 run 级进度）
       } else if (data.type === 'result') {
         workerRef.current = null
         setState({
