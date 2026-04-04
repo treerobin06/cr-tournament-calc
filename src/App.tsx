@@ -38,9 +38,9 @@ function App() {
       </header>
 
       {/* Main Layout */}
-      <div className="max-w-screen-2xl mx-auto px-4 py-4 flex gap-4">
+      <div className="w-full px-6 py-4 flex gap-6">
         {/* Left Sidebar: ParameterPanel */}
-        <aside className="w-72 shrink-0">
+        <aside className="w-80 shrink-0">
           <ParameterPanel params={params} onChange={setParams} />
         </aside>
 
