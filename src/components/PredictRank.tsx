@@ -38,16 +38,16 @@ export function PredictRank({ params }: PredictRankProps) {
   }, [currentWins, clampedLosses, rFull, alpha, n, personalWinRate, isActive])
 
   return (
-    <details className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 group">
-      <summary className="p-4 cursor-pointer text-lg font-bold text-amber-400 select-none list-none flex items-center gap-2 transition-colors duration-200 hover:bg-white/[0.03] rounded-2xl" style={{fontFamily:'Fredoka'}}>
-        <span className="text-sm transition-transform duration-200 group-open:rotate-90">&#9654;</span>
-        预测最终排名
+    <details className="card-premium group">
+      <summary className="p-5 cursor-pointer select-none list-none flex items-center gap-2.5 transition-colors duration-200 hover:bg-white/[0.03] rounded-2xl">
+        <span className="text-sm transition-transform duration-200 group-open:rotate-90 text-amber-400">&#9654;</span>
+        <span className="section-title text-gold text-lg">预测最终排名</span>
       </summary>
-      <div className="px-5 pb-5 space-y-4">
+      <div className="px-6 pb-6 space-y-4">
         {/* 输入区域 */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label htmlFor="current-wins-input" className="text-xs text-slate-300 font-semibold">当前胜场</Label>
+            <Label htmlFor="current-wins-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">当前胜场</Label>
             <Input
               id="current-wins-input"
               type="number"
@@ -59,7 +59,7 @@ export function PredictRank({ params }: PredictRankProps) {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="current-losses-input" className="text-xs text-slate-300 font-semibold">当前失败场（最大 {lives}）</Label>
+            <Label htmlFor="current-losses-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">当前失败场（最大 {lives}）</Label>
             <Input
               id="current-losses-input"
               type="number"
@@ -93,9 +93,9 @@ export function PredictRank({ params }: PredictRankProps) {
         {/* 个人胜率滑块（仅比赛未结束时显示） */}
         {isActive && (
           <div className="space-y-2">
-            <Label className="text-xs text-slate-300 font-semibold">
+            <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
               预计后续每局胜率
-              <span className="ml-2 text-slate-400 font-normal">
+              <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
                 {personalWinRatePct}%
               </span>
             </Label>
@@ -116,13 +116,13 @@ export function PredictRank({ params }: PredictRankProps) {
         )}
 
         {/* 预测结果 */}
-        <div className="border-t border-purple-900/40 pt-3 space-y-3">
+        <div className="border-t border-purple-900/20 pt-4 space-y-3">
           {/* 中位排名（p50） */}
-          <div className="rounded-xl bg-[#27273B]/60 p-3 text-center">
-            <div className="text-3xl font-extrabold text-amber-400">
+          <div className="rounded-xl bg-purple-500/5 border border-purple-900/20 p-4 text-center">
+            <div className="stat-number text-3xl">
               #{result.p50RankRange[0].toLocaleString()} ~ #{result.p50RankRange[1].toLocaleString()}
             </div>
-            <div className="text-xs text-slate-400 mt-1">预测中位排名（p50 区间）</div>
+            <div className="text-xs text-slate-400 mt-2 font-medium tracking-wide">预测中位排名（p50 区间）</div>
           </div>
 
           {/* 置信区间 */}

@@ -80,15 +80,19 @@ h1, h2, h3, h4, h5, h6 {
 
 /* 输入框样式调整 */
 input[type="number"] {
-  background: rgba(15,15,35,0.6) !important;
-  border: 1px solid rgba(76,29,149,0.4) !important;
+  background: rgba(15, 15, 35, 0.5) !important;
+  border: 1px solid rgba(124, 58, 237, 0.25) !important;
+  border-radius: 12px !important;
   color: #E2E8F0 !important;
-  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  font-size: 15px !important;
+  font-family: 'Nunito', sans-serif !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
 }
 input[type="number"]:focus {
-  border-color: #7C3AED !important;
+  border-color: rgba(124, 58, 237, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(124,58,237,0.25) !important;
 }
 
 /* Select 触发器样式 */
@@ -133,4 +137,84 @@ input[type="number"]:focus {
 /* Button */
 button[data-slot="button"] {
   font-family: 'Nunito', sans-serif;
+}
+
+/* ===== Apple-quality Premium Styles ===== */
+
+/* Premium card style */
+.card-premium {
+  background: linear-gradient(180deg, rgba(30, 28, 53, 0.95) 0%, rgba(22, 20, 45, 0.98) 100%);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.3),
+    0 4px 16px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-premium:hover {
+  border-color: rgba(124, 58, 237, 0.35);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.3),
+    0 8px 32px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Golden accent text with subtle glow */
+.text-gold {
+  color: #F59E0B;
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+/* Section titles */
+.section-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Smooth number display */
+.stat-number {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 1;
+  color: #F59E0B;
+  text-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+}
+
+/* Tab animation */
+@keyframes tabGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
+}
+
+/* Probability bar */
+.prob-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(15, 15, 35, 0.6);
+  overflow: hidden;
+}
+.prob-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slider thumb premium feel */
+[data-slot="slider"] [data-slot="slider-thumb"] {
+  width: 20px !important;
+  height: 20px !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3), 0 1px 3px rgba(0,0,0,0.4) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+[data-slot="slider"] [data-slot="slider-thumb"]:hover {
+  transform: scale(1.15) !important;
+  box-shadow: 0 3px 12px rgba(245, 158, 11, 0.4), 0 2px 4px rgba(0,0,0,0.5) !important;
+}
+[data-slot="slider"] [data-slot="slider-thumb"]:active {
+  transform: scale(1.05) !important;
 }

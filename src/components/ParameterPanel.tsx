@@ -84,14 +84,14 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
   const expectedWins = params.kappa.toFixed(2)
 
   return (
-    <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5 h-fit">
-      <h2 className="text-xl font-bold text-amber-400 mb-4" style={{fontFamily:'Fredoka'}}>参数配置</h2>
-      <div className="space-y-5">
+    <div className="card-premium p-6 h-fit">
+      <h2 className="section-title text-gold text-xl mb-6">参数配置</h2>
+      <div className="space-y-6">
         {/* 参与人数 */}
         <div className="space-y-2">
-          <Label className="text-sm text-slate-300 font-semibold">
+          <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
             参与人数
-            <span className="ml-2 text-slate-400 font-normal">
+            <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
               {params.playerCount.toLocaleString()}
             </span>
           </Label>
@@ -125,7 +125,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 命数（失败次数上限） */}
         <div className="space-y-2">
-          <Label className="text-sm text-slate-300 font-semibold">命数（最大失败次数）</Label>
+          <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">命数（最大失败次数）</Label>
           <Select
             value={String(params.lives)}
             onValueChange={(v) => update({ lives: parseInt(v) })}
@@ -145,9 +145,9 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 满局率 */}
         <div className="space-y-2">
-          <Label className="text-sm text-slate-300 font-semibold">
+          <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
             满局率
-            <span className="ml-2 text-slate-400 font-normal">
+            <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
               {(params.fullPlayRatio * 100).toFixed(0)}%
             </span>
           </Label>
@@ -166,7 +166,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 目标排名 */}
         <div className="space-y-2">
-          <Label htmlFor="target-rank-input" className="text-sm text-slate-300 font-semibold">目标排名</Label>
+          <Label htmlFor="target-rank-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">目标排名</Label>
           <Input
             id="target-rank-input"
             type="number"
@@ -182,7 +182,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
         </div>
 
         {/* 高级选项 */}
-        <div className="border-t border-purple-900/40 pt-3">
+        <div className="border-t border-purple-900/20 pt-4">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="text-sm text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
@@ -192,9 +192,9 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
           </button>
           {showAdvanced && (
             <div className="mt-3 space-y-2">
-              <Label className="text-sm text-slate-300 font-semibold">
+              <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
                 κ（分布形状参数）
-                <span className="ml-2 text-slate-400 font-normal">
+                <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
                   {params.kappa.toFixed(2)}
                 </span>
               </Label>

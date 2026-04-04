@@ -25,16 +25,16 @@ export function DataTable({ distribution, params }: DataTableProps) {
   return (
     <div className="space-y-6">
       {/* 关键节点表 */}
-      <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
-        <h3 className="text-lg font-bold text-amber-400 mb-3" style={{fontFamily:'Fredoka'}}>关键排名节点（95% 置信胜场数）</h3>
+      <div className="card-premium p-6">
+        <h3 className="section-title text-gold text-base mb-4">关键排名节点（95% 置信胜场数）</h3>
         <div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-1.5 pr-4 font-medium text-slate-400">目标名次</th>
+                <tr className="border-b border-purple-900/20">
+                  <th className="text-left py-2 pr-4 text-xs font-semibold uppercase tracking-wider text-amber-400/80">目标名次</th>
                   {KEY_RANKS.map((rank) => (
-                    <th key={rank} className="text-center py-1.5 px-2 font-medium text-slate-400">
+                    <th key={rank} className="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-amber-400/80">
                       前 {rank >= 1000 ? `${rank / 1000}k` : rank}
                     </th>
                   ))}
@@ -61,18 +61,18 @@ export function DataTable({ distribution, params }: DataTableProps) {
       </div>
 
       {/* 完整分布表 */}
-      <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
-        <h3 className="text-lg font-bold text-amber-400 mb-3" style={{fontFamily:'Fredoka'}}>完整分布表</h3>
+      <div className="card-premium p-6">
+        <h3 className="section-title text-gold text-base mb-4">完整分布表</h3>
         <div>
           <div className="overflow-auto max-h-80">
             <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-[#1E1C35]">
-                <tr className="border-b border-purple-900/40">
-                  <th className="text-right py-1.5 pr-3 font-medium text-slate-400">胜场</th>
-                  <th className="text-right py-1.5 pr-3 font-medium text-slate-400">预期人数</th>
-                  <th className="text-right py-1.5 pr-3 font-medium text-slate-400">累计人数</th>
-                  <th className="text-right py-1.5 pr-3 font-medium text-slate-400">累计概率</th>
-                  <th className="text-right py-1.5 font-medium text-slate-400">衰减比</th>
+              <thead className="sticky top-0" style={{ background: 'linear-gradient(180deg, rgba(30, 28, 53, 0.98), rgba(22, 20, 45, 0.98))' }}>
+                <tr className="border-b border-purple-900/20">
+                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">胜场</th>
+                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">预期人数</th>
+                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">累计人数</th>
+                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">累计概率</th>
+                  <th className="text-right py-2 text-xs font-semibold uppercase tracking-wider text-amber-400/80">衰减比</th>
                 </tr>
               </thead>
               <tbody>
@@ -85,9 +85,9 @@ export function DataTable({ distribution, params }: DataTableProps) {
                   return (
                     <tr
                       key={row.wins}
-                      className={`border-b border-purple-900/20 ${
+                      className={`border-b border-purple-900/10 transition-colors duration-150 hover:bg-purple-500/5 ${
                         isHighlighted
-                          ? "bg-emerald-500/10"
+                          ? "bg-emerald-500/5 border-l-2 border-l-emerald-400"
                           : row.wins % 2 === 0
                           ? "bg-white/[0.02]"
                           : ""

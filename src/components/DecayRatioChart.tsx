@@ -55,23 +55,29 @@ export function DecayRatioChart({ distribution }: DecayRatioChartProps) {
     }))
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>衰减比 P(k)/P(k−1)</span>
+        <span className="section-title text-gold text-base">衰减比 P(k)/P(k-1)</span>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={380}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(76,29,149,0.3)" />
+          <defs>
+            <linearGradient id="decayLineGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#7C3AED" />
+              <stop offset="100%" stopColor="#A78BFA" />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,58,237,0.08)" />
           <XAxis
             dataKey="wins"
-            tick={{ fontSize: 11, fill: '#94A3B8' }}
-            label={{ value: "胜场数", position: "insideBottom", offset: -2, fontSize: 11, fill: '#94A3B8' }}
+            tick={{ fontSize: 12, fill: '#64748B' }}
+            label={{ value: "胜场数", position: "insideBottom", offset: -2, fontSize: 12, fill: '#64748B' }}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#94A3B8' }}
+            tick={{ fontSize: 12, fill: '#64748B' }}
             unit="%"
             domain={[0, 100]}
-            label={{ value: "衰减比", angle: -90, position: "insideLeft", fontSize: 11, fill: '#94A3B8' }}
+            label={{ value: "衰减比", angle: -90, position: "insideLeft", fontSize: 12, fill: '#64748B' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine
@@ -83,10 +89,10 @@ export function DecayRatioChart({ distribution }: DecayRatioChartProps) {
           <Line
             type="monotone"
             dataKey="decayPercent"
-            stroke="#A78BFA"
-            strokeWidth={2}
+            stroke="url(#decayLineGradient)"
+            strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 4 }}
+            activeDot={{ r: 5, fill: '#A78BFA', stroke: '#7C3AED', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

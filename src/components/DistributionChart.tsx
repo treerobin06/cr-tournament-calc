@@ -59,9 +59,9 @@ export function DistributionChart({ distribution, targetWins }: DistributionChar
   const yLabel = logScale ? "log₁₀(人数)" : "人数"
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-base font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>胜场分布</span>
+        <span className="section-title text-gold text-base">胜场分布</span>
         <Button
           variant="outline"
           size="sm"
@@ -71,17 +71,23 @@ export function DistributionChart({ distribution, targetWins }: DistributionChar
           {logScale ? "线性刻度" : "对数刻度"}
         </Button>
       </div>
-      <ResponsiveContainer width="100%" height={350}>
+      <ResponsiveContainer width="100%" height={380}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(76,29,149,0.3)" />
+          <defs>
+            <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#A78BFA" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.8} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,58,237,0.08)" />
           <XAxis
             dataKey="wins"
-            tick={{ fontSize: 11, fill: '#94A3B8' }}
-            label={{ value: "胜场数", position: "insideBottom", offset: -2, fontSize: 11, fill: '#94A3B8' }}
+            tick={{ fontSize: 12, fill: '#64748B' }}
+            label={{ value: "胜场数", position: "insideBottom", offset: -2, fontSize: 12, fill: '#64748B' }}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#94A3B8' }}
-            label={{ value: yLabel, angle: -90, position: "insideLeft", fontSize: 11, fill: '#94A3B8' }}
+            tick={{ fontSize: 12, fill: '#64748B' }}
+            label={{ value: yLabel, angle: -90, position: "insideLeft", fontSize: 12, fill: '#64748B' }}
           />
           <Tooltip content={<CustomTooltip />} />
           {targetWins !== undefined && (
@@ -92,7 +98,7 @@ export function DistributionChart({ distribution, targetWins }: DistributionChar
               label={{ value: `目标 ${targetWins} 胜`, position: "top", fontSize: 10, fill: "#F59E0B" }}
             />
           )}
-          <Bar dataKey="displayCount" fill="#7C3AED" radius={[2, 2, 0, 0]} maxBarSize={20} />
+          <Bar dataKey="displayCount" fill="url(#purpleGradient)" radius={[3, 3, 0, 0]} maxBarSize={22} />
         </BarChart>
       </ResponsiveContainer>
     </div>

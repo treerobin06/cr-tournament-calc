@@ -46,9 +46,9 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
   const pct = Math.round(progress * 100)
 
   return (
-    <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
-      <div className="pb-3 flex items-center gap-2">
-        <h3 className="text-lg font-bold text-amber-400 mb-0" style={{fontFamily:'Fredoka'}}>蒙特卡罗模拟</h3>
+    <div className="card-premium p-6">
+      <div className="pb-4 flex items-center gap-2">
+        <h3 className="section-title text-gold text-base mb-0">蒙特卡罗模拟</h3>
         <Badge variant="outline" className="text-xs font-normal border-purple-700/50 text-slate-400">
           实验性
         </Badge>
@@ -82,7 +82,7 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
           ) : (
             <button
               onClick={handleRun}
-              className="px-6 py-2.5 rounded-xl font-bold bg-gradient-to-b from-amber-400 to-amber-600 text-gray-900 hover:from-amber-300 hover:to-amber-500 cursor-pointer transition-all duration-200"
+              className="px-8 py-3 rounded-xl font-bold text-sm tracking-wide text-[#0F0F23] bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 active:from-amber-500 active:to-amber-600 shadow-lg shadow-amber-500/20 hover:shadow-amber-400/30 transition-all duration-200 cursor-pointer"
             >
               运行模拟
             </button>

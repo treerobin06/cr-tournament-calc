@@ -159,9 +159,9 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
   }, [rFull, alpha, params.targetRank, N_VALUES, WINS_VALUES])
 
   return (
-    <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
-      <div className="pb-2">
-        <h3 className="text-lg font-bold text-amber-400 mb-1" style={{fontFamily:'Fredoka'}}>鲁棒性热力图</h3>
+    <div className="card-premium p-6">
+      <div className="pb-3">
+        <h3 className="section-title text-gold text-base mb-1">鲁棒性热力图</h3>
         <p className="text-xs text-slate-400">
           各胜场数在不同参与人数下进入前{" "}
           <strong className="text-slate-200">{params.targetRank.toLocaleString()}</strong> 名的概率
