@@ -43,15 +43,13 @@ export function paramsToMathArgs(params: TournamentParams): {
   alpha: number
   n: number
 } {
-  // kappa 是连续的 r 参数
-  // rFull = ceil(kappa)，alpha = ceil(kappa) - kappa（这样 alpha*rFull + (1-alpha)*(rFull-1) = kappa）
-  const rFull = Math.max(2, Math.ceil(params.kappa))
-  const alpha = rFull - params.kappa // alpha in [0,1]
+  // rFull = 命数（如 5 条命）
+  // alpha = 打满比例（如 0.9 表示 90% 玩家打满 5 命，10% 打 4 命放弃）
+  // n = 总参赛人数
+  const rFull = params.lives
+  const alpha = params.fullPlayRatio
 
-  // 参与玩家中只有 fullPlayRatio 比例打满场（影响等效人数）
-  const n = Math.round(params.playerCount * params.fullPlayRatio)
-
-  return { rFull, alpha, n }
+  return { rFull, alpha, n: params.playerCount }
 }
 
 /**
