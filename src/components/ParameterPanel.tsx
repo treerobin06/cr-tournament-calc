@@ -108,9 +108,11 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
               step={0.001}
               value={[sliderVal]}
               onValueChange={([v]) => update({ playerCount: logScale(v, LOG_MIN, LOG_MAX) })}
+              aria-label="参与人数"
             />
           </div>
           <Input
+            id="player-count-input"
             type="number"
             value={params.playerCount}
             min={1000}
@@ -122,6 +124,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
               }
             }}
             className="h-8 text-sm"
+            aria-label="参与人数（精确输入）"
           />
         </div>
 
@@ -132,7 +135,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             value={String(params.lives)}
             onValueChange={(v) => update({ lives: parseInt(v) })}
           >
-            <SelectTrigger className="h-8 text-sm">
+            <SelectTrigger className="h-8 text-sm" aria-label="命数（最大失败次数）">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -159,6 +162,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             step={1}
             value={[Math.round(params.fullPlayRatio * 100)]}
             onValueChange={([v]) => update({ fullPlayRatio: v / 100 })}
+            aria-label="满局率"
           />
           <p className="text-xs text-muted-foreground">
             真正打完比赛的玩家比例
@@ -167,8 +171,9 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 目标排名 */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">目标排名</Label>
+          <Label htmlFor="target-rank-input" className="text-sm font-medium">目标排名</Label>
           <Input
+            id="target-rank-input"
             type="number"
             value={params.targetRank}
             min={1}
@@ -204,6 +209,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
                 step={1}
                 value={[Math.round(params.kappa * 100)]}
                 onValueChange={([v]) => update({ kappa: v / 100 })}
+                aria-label="κ 分布形状参数"
               />
               <p className="text-xs text-muted-foreground">
                 期望胜场 ≈ <strong>{expectedWins}</strong>（NegBin r 参数）

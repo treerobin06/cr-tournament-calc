@@ -47,8 +47,9 @@ export function PredictRank({ params }: PredictRankProps) {
         {/* 输入区域 */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">当前胜场</Label>
+            <Label htmlFor="current-wins-input" className="text-xs">当前胜场</Label>
             <Input
+              id="current-wins-input"
               type="number"
               min={0}
               max={500}
@@ -58,8 +59,9 @@ export function PredictRank({ params }: PredictRankProps) {
             />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">当前失败场（最大 {lives}）</Label>
+            <Label htmlFor="current-losses-input" className="text-xs">当前失败场（最大 {lives}）</Label>
             <Input
+              id="current-losses-input"
               type="number"
               min={0}
               max={lives}
@@ -103,6 +105,7 @@ export function PredictRank({ params }: PredictRankProps) {
               step={1}
               value={[personalWinRatePct]}
               onValueChange={([v]) => setPersonalWinRatePct(v)}
+              aria-label="预计后续每局胜率"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>30%</span>
@@ -116,7 +119,7 @@ export function PredictRank({ params }: PredictRankProps) {
         <div className="border-t pt-3 space-y-3">
           {/* 中位排名（p50） */}
           <div className="rounded-lg bg-muted/40 p-3 text-center">
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-blue-400">
               #{result.p50RankRange[0].toLocaleString()} ~ #{result.p50RankRange[1].toLocaleString()}
             </div>
             <div className="text-xs text-muted-foreground mt-1">预测中位排名（p50 区间）</div>
@@ -126,7 +129,7 @@ export function PredictRank({ params }: PredictRankProps) {
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded border p-2">
               <div className="text-xs text-muted-foreground mb-1">80% 置信区间</div>
-              <div className="font-medium text-orange-600 text-sm">
+              <div className="font-medium text-orange-400 text-sm">
                 #{result.p80RankRange[0].toLocaleString()}
                 <span className="text-muted-foreground mx-1">~</span>
                 #{result.p80RankRange[1].toLocaleString()}

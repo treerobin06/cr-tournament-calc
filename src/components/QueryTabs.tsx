@@ -78,8 +78,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
         <Card>
           <CardContent className="pt-4 space-y-4">
             <div className="space-y-2">
-              <Label>胜场数</Label>
+              <Label htmlFor="mode1-wins-input">胜场数</Label>
               <Input
+                id="mode1-wins-input"
                 type="number"
                 min={0}
                 max={100}
@@ -93,13 +94,13 @@ export function QueryTabs({ params }: QueryTabsProps) {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg border p-3 text-center">
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-blue-400">
                       #{rankResult.optimisticRank.toLocaleString()}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">乐观排名（期望）</div>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <div className="text-2xl font-bold text-orange-600">
+                    <div className="text-2xl font-bold text-orange-400">
                       #{rankResult.conservativeRank.toLocaleString()}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">保守排名（95% 置信）</div>
@@ -185,8 +186,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
           <CardContent className="pt-4 space-y-4">
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">胜场数</Label>
+                <Label htmlFor="mode3-wins-input" className="text-xs">胜场数</Label>
                 <Input
+                  id="mode3-wins-input"
                   type="number"
                   min={0}
                   value={wins3}
@@ -195,8 +197,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">N 最小值</Label>
+                <Label htmlFor="mode3-n-min-input" className="text-xs">N 最小值</Label>
                 <Input
+                  id="mode3-n-min-input"
                   type="number"
                   min={1000}
                   value={nMin}
@@ -205,8 +208,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">N 最大值</Label>
+                <Label htmlFor="mode3-n-max-input" className="text-xs">N 最大值</Label>
                 <Input
+                  id="mode3-n-max-input"
                   type="number"
                   min={1000}
                   value={nMax}
@@ -248,8 +252,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
         <Card>
           <CardContent className="pt-4 space-y-4">
             <div className="space-y-2">
-              <Label>胜场数</Label>
+              <Label htmlFor="mode4-wins-input">胜场数</Label>
               <Input
+                id="mode4-wins-input"
                 type="number"
                 min={0}
                 value={wins4}
@@ -271,13 +276,13 @@ export function QueryTabs({ params }: QueryTabsProps) {
                     <div className="text-xs text-muted-foreground mt-1">80% 置信</div>
                   </div>
                   <div className="rounded-lg border p-3 text-center bg-muted/30">
-                    <div className="text-xl font-bold text-blue-600">
+                    <div className="text-xl font-bold text-blue-400">
                       {safeCount.maxPlayers.toLocaleString()}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">95% 置信</div>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <div className="text-xl font-bold text-orange-600">
+                    <div className="text-xl font-bold text-orange-400">
                       {safeCount.maxPlayers99.toLocaleString()}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">99% 置信</div>

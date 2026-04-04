@@ -44,9 +44,9 @@ export function MathInsights() {
       <CardContent className="space-y-5">
         {/* NegBin PMF */}
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             负二项分布 PMF
-          </h3>
+          </h4>
           <FormulaBlock
             latex={String.raw`W \sim \mathrm{NegBin}(r,\, p=0.5)`}
             description="玩家胜场数 W 服从负二项分布，r 为最大失败次数，p=0.5 为胜率"
@@ -59,9 +59,9 @@ export function MathInsights() {
 
         {/* 递推公式 */}
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             递推关系
-          </h3>
+          </h4>
           <FormulaBlock
             latex={String.raw`P(0) = \left(\frac{1}{2}\right)^r, \quad P(k+1) = P(k) \cdot \frac{k+r}{2(k+1)}`}
             description="高效递推计算，避免大数阶乘"
@@ -70,9 +70,9 @@ export function MathInsights() {
 
         {/* 衰减比 */}
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             衰减比解读
-          </h3>
+          </h4>
           <FormulaBlock
             latex={String.raw`\rho(k) = \frac{P(W=k)}{P(W=k-1)} = \frac{k+r-1}{2k}`}
             description="衰减比趋近 1/2（50%）说明每多赢一场的玩家数量约减半"
@@ -85,9 +85,9 @@ export function MathInsights() {
 
         {/* 晋级概率 */}
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             晋级概率（二项分布近似）
-          </h3>
+          </h4>
           <FormulaBlock
             latex={String.raw`X_k \sim \mathrm{Binomial}(N,\; S(k{+}1))`}
             description="X_k = 比 k 胜者排名更靠前的人数，S(k+1) = P(W > k)"
@@ -100,9 +100,9 @@ export function MathInsights() {
 
         {/* 混合分布 */}
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             混合分布（κ 插值）
-          </h3>
+          </h4>
           <FormulaBlock
             latex={String.raw`P_{\text{mix}}(k) = \alpha \cdot P_{\mathrm{NB}(r,\,0.5)}(k) + (1-\alpha) \cdot P_{\mathrm{NB}(r-1,\,0.5)}(k)`}
             description="κ = r - (1-α)，允许连续调节分布形状参数"
