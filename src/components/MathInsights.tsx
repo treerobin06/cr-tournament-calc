@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import katex from "katex"
 import "katex/dist/katex.min.css"
 
@@ -26,7 +25,7 @@ function FormulaBlock({ latex, display = true, description }: FormulaBlockProps)
     <div className="space-y-1">
       <div
         ref={ref}
-        className="overflow-x-auto py-2 px-3 bg-muted/30 rounded-md text-sm"
+        className="overflow-x-auto py-2 px-3 bg-[#0F0F23]/50 rounded-lg text-sm"
       />
       {description && (
         <p className="text-xs text-muted-foreground px-1">{description}</p>
@@ -37,11 +36,9 @@ function FormulaBlock({ latex, display = true, description }: FormulaBlockProps)
 
 export function MathInsights() {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">数学原理</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <div className="rounded-2xl bg-[#1a1840] border border-purple-900/40 p-5">
+      <h3 className="text-lg font-bold text-amber-400 mb-3" style={{fontFamily:'Fredoka'}}>数学原理</h3>
+      <div className="space-y-5">
         {/* NegBin PMF */}
         <div className="space-y-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -108,7 +105,7 @@ export function MathInsights() {
             description="κ = r - (1-α)，允许连续调节分布形状参数"
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

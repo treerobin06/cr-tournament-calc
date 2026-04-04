@@ -11,8 +11,6 @@ import { SimulationPanel } from "@/components/SimulationPanel"
 import { PredictRank } from "@/components/PredictRank"
 import { RobustnessHeatmap } from "@/components/RobustnessHeatmap"
 import { computeDistribution } from "@/lib/math"
-import { Card, CardContent } from "@/components/ui/card"
-
 function App() {
   const [params, setParams] = useState<TournamentParams>(DEFAULT_PARAMS)
 
@@ -28,17 +26,15 @@ function App() {
   }, [distribution, params.targetRank])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-baseline gap-4">
-          <h1 className="text-xl font-bold tracking-tight">
-            皇室战争锦标赛排名计算器
-          </h1>
-          <span className="text-xs text-muted-foreground hidden sm:block">
-            基于负二项分布的理论模型 · 仅供参考，实际结果可能因游戏机制变动而偏差
-          </span>
-        </div>
+      <header className="px-6 py-5 border-b border-purple-900/30">
+        <h1 className="text-3xl font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>
+          皇室战争锦标赛排名计算器
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">
+          基于负二项分布的理论估算 · 输出为参考区间，非精确预测
+        </p>
       </header>
 
       {/* Main Layout */}
@@ -62,21 +58,15 @@ function App() {
 
           {/* 2×2 Chart Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardContent className="pt-4">
-                <DistributionChart distribution={distribution} targetWins={targetWins} />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4">
-                <CumulativeRankChart distribution={distribution} targetRank={params.targetRank} />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4">
-                <DecayRatioChart distribution={distribution} />
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
+              <DistributionChart distribution={distribution} targetWins={targetWins} />
+            </div>
+            <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
+              <CumulativeRankChart distribution={distribution} targetRank={params.targetRank} />
+            </div>
+            <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
+              <DecayRatioChart distribution={distribution} />
+            </div>
             <RobustnessHeatmap params={params} />
           </section>
 

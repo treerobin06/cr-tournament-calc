@@ -1,28 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --background: #0F0F23;
+  --foreground: #E2E8F0;
+  --card: #1E1C35;
+  --card-foreground: #E2E8F0;
+  --popover: #1E1C35;
+  --popover-foreground: #E2E8F0;
+  --primary: #7C3AED;
+  --primary-foreground: #FFFFFF;
+  --secondary: #27273B;
+  --secondary-foreground: #E2E8F0;
+  --muted: #27273B;
+  --muted-foreground: #94A3B8;
+  --accent: #27273B;
+  --accent-foreground: #E2E8F0;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(76,29,149,0.4);
+  --input: rgba(76,29,149,0.3);
+  --ring: #7C3AED;
+  --radius: 0.75rem;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(160deg, #0F0F23 0%, #1a1040 50%, #0F0F23 100%);
+  color: var(--foreground);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fredoka', sans-serif;
 }
 
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15,15,35,0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(124,58,237,0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124,58,237,0.6);
+}
+
+/* 覆盖 shadcn Card */
+[data-slot="card"] {
+  background: #1E1C35 !important;
+  border: 1px solid rgba(76,29,149,0.4) !important;
+  border-radius: 16px !important;
+  color: #E2E8F0 !important;
+}
+
+/* 输入框样式调整 */
+input[type="number"] {
+  background: rgba(15,15,35,0.6) !important;
+  border: 1px solid rgba(76,29,149,0.4) !important;
+  color: #E2E8F0 !important;
+  border-radius: 10px !important;
+}
+input[type="number"]:focus {
+  border-color: #7C3AED !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.25) !important;
+}
+
+/* Select 触发器样式 */
+[data-slot="select-trigger"] {
+  background: rgba(15,15,35,0.6) !important;
+  border: 1px solid rgba(76,29,149,0.4) !important;
+  color: #E2E8F0 !important;
+  border-radius: 10px !important;
+}
+
+/* Select 内容下拉面板 */
+[data-slot="select-content"] {
+  background: #1E1C35 !important;
+  border: 1px solid rgba(76,29,149,0.4) !important;
+  color: #E2E8F0 !important;
+}
+
+/* Slider 轨道 */
+[data-slot="slider"] [data-slot="slider-track"] {
+  background: rgba(15,15,35,0.6) !important;
+}
+[data-slot="slider"] [data-slot="slider-range"] {
+  background: linear-gradient(90deg, #7C3AED, #A78BFA) !important;
+}
+[data-slot="slider"] [data-slot="slider-thumb"] {
+  background: #F59E0B !important;
+  border-color: #D97706 !important;
+}
+
+/* Badge */
+[data-slot="badge"] {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Tooltip */
+[data-slot="tooltip-content"] {
+  background: #1E1C35 !important;
+  border: 1px solid rgba(76,29,149,0.4) !important;
+  color: #E2E8F0 !important;
+}
+
+/* Button */
+button[data-slot="button"] {
+  font-family: 'Nunito', sans-serif;
 }

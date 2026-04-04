@@ -1,5 +1,4 @@
 import { useRef, useEffect } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { promotionProbability } from "@/lib/math"
 import type { TournamentParams } from "@/components/ParameterPanel"
 import { paramsToMathArgs } from "@/components/ParameterPanel"
@@ -86,7 +85,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     ctx.scale(dpr, dpr)
 
     // 背景
-    ctx.fillStyle = "#ffffff"
+    ctx.fillStyle = "#1E1C35"
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
     // 绘制热力图格子
@@ -105,7 +104,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     })
 
     // 绘制 X 轴标签（参与人数）
-    ctx.fillStyle = "#6b7280"
+    ctx.fillStyle = "#94A3B8"
     ctx.font = `${10 * Math.min(1, 1)}px sans-serif`
     ctx.textAlign = "center"
     // 选取 5 个刻度显示
@@ -118,13 +117,13 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
       ctx.fillText(label, x, CANVAS_H - MARGIN_BOTTOM + 14)
     })
     ctx.textAlign = "center"
-    ctx.fillStyle = "#374151"
+    ctx.fillStyle = "#E2E8F0"
     ctx.font = "11px sans-serif"
     ctx.fillText("参与人数", MARGIN_LEFT + plotW / 2, CANVAS_H - 4)
 
     // 绘制 Y 轴标签（胜场数）
     ctx.textAlign = "right"
-    ctx.fillStyle = "#6b7280"
+    ctx.fillStyle = "#94A3B8"
     ctx.font = "10px sans-serif"
     // 每隔几行标一个
     WINS_VALUES.forEach((wins, rowIdx) => {
@@ -138,30 +137,30 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     ctx.translate(10, MARGIN_TOP + plotH / 2)
     ctx.rotate(-Math.PI / 2)
     ctx.textAlign = "center"
-    ctx.fillStyle = "#374151"
+    ctx.fillStyle = "#E2E8F0"
     ctx.font = "11px sans-serif"
     ctx.fillText("胜场数", 0, 0)
     ctx.restore()
   }, [rFull, alpha, params.targetRank, N_VALUES, WINS_VALUES])
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">鲁棒性热力图</CardTitle>
-        <p className="text-xs text-muted-foreground">
+    <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
+      <div className="pb-2">
+        <h3 className="text-lg font-bold text-amber-400 mb-1" style={{fontFamily:'Fredoka'}}>鲁棒性热力图</h3>
+        <p className="text-xs text-slate-400">
           各胜场数在不同参与人数下进入前{" "}
-          <strong>{params.targetRank.toLocaleString()}</strong> 名的概率
+          <strong className="text-slate-200">{params.targetRank.toLocaleString()}</strong> 名的概率
         </p>
-      </CardHeader>
-      <CardContent className="space-y-3">
+      </div>
+      <div className="space-y-3">
         <canvas
           ref={canvasRef}
-          className="w-full rounded border"
+          className="w-full rounded-xl border border-purple-900/40"
           style={{ maxWidth: "500px", display: "block", margin: "0 auto" }}
         />
 
         {/* 图例 */}
-        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
@@ -184,7 +183,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
             <span>危险（&lt;50%）</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

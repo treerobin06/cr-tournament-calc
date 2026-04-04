@@ -1,4 +1,3 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
@@ -87,16 +86,14 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
   const expectedWins = params.kappa.toFixed(2)
 
   return (
-    <Card className="h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">参数配置</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5 h-fit">
+      <h2 className="text-xl font-bold text-amber-400 mb-4" style={{fontFamily:'Fredoka'}}>参数配置</h2>
+      <div className="space-y-5">
         {/* 参与人数 */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">
+          <Label className="text-sm text-slate-300 font-semibold">
             参与人数
-            <span className="ml-2 text-muted-foreground font-normal">
+            <span className="ml-2 text-slate-400 font-normal">
               {params.playerCount.toLocaleString()}
             </span>
           </Label>
@@ -130,7 +127,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 命数（失败次数上限） */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">命数（最大失败次数）</Label>
+          <Label className="text-sm text-slate-300 font-semibold">命数（最大失败次数）</Label>
           <Select
             value={String(params.lives)}
             onValueChange={(v) => update({ lives: parseInt(v) })}
@@ -150,9 +147,9 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 满局率 */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">
+          <Label className="text-sm text-slate-300 font-semibold">
             满局率
-            <span className="ml-2 text-muted-foreground font-normal">
+            <span className="ml-2 text-slate-400 font-normal">
               {(params.fullPlayRatio * 100).toFixed(0)}%
             </span>
           </Label>
@@ -164,14 +161,14 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             onValueChange={([v]) => update({ fullPlayRatio: v / 100 })}
             aria-label="满局率"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-slate-400">
             真正打完比赛的玩家比例
           </p>
         </div>
 
         {/* 目标排名 */}
         <div className="space-y-2">
-          <Label htmlFor="target-rank-input" className="text-sm font-medium">目标排名</Label>
+          <Label htmlFor="target-rank-input" className="text-sm text-slate-300 font-semibold">目标排名</Label>
           <Input
             id="target-rank-input"
             type="number"
@@ -187,19 +184,19 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
         </div>
 
         {/* 高级选项 */}
-        <div className="border-t pt-3">
+        <div className="border-t border-purple-900/40 pt-3">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            className="text-sm text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
           >
             <span>{showAdvanced ? "▾" : "▸"}</span>
             高级选项
           </button>
           {showAdvanced && (
             <div className="mt-3 space-y-2">
-              <Label className="text-sm font-medium">
+              <Label className="text-sm text-slate-300 font-semibold">
                 κ（分布形状参数）
-                <span className="ml-2 text-muted-foreground font-normal">
+                <span className="ml-2 text-slate-400 font-normal">
                   {params.kappa.toFixed(2)}
                 </span>
               </Label>
@@ -211,16 +208,16 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
                 onValueChange={([v]) => update({ kappa: v / 100 })}
                 aria-label="κ 分布形状参数"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-400">
                 期望胜场 ≈ <strong>{expectedWins}</strong>（NegBin r 参数）
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-400">
                 κ 越大 → 分布越平缓，高胜场玩家越多
               </p>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
