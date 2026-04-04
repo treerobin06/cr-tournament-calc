@@ -38,9 +38,12 @@ export function PredictRank({ params }: PredictRankProps) {
   }, [currentWins, clampedLosses, rFull, alpha, n, personalWinRate, isActive])
 
   return (
-    <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
-      <h3 className="text-lg font-bold text-amber-400 mb-3" style={{fontFamily:'Fredoka'}}>预测最终排名</h3>
-      <div className="space-y-4">
+    <details className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 group">
+      <summary className="p-4 cursor-pointer text-lg font-bold text-amber-400 select-none list-none flex items-center gap-2 transition-colors duration-200 hover:bg-white/[0.03] rounded-2xl" style={{fontFamily:'Fredoka'}}>
+        <span className="text-sm transition-transform duration-200 group-open:rotate-90">&#9654;</span>
+        预测最终排名
+      </summary>
+      <div className="px-5 pb-5 space-y-4">
         {/* 输入区域 */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
@@ -155,6 +158,6 @@ export function PredictRank({ params }: PredictRankProps) {
           </div>
         )}
       </div>
-    </div>
+    </details>
   )
 }

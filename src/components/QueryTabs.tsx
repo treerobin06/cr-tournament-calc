@@ -78,13 +78,16 @@ export function QueryTabs({ params }: QueryTabsProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 px-4 rounded-xl font-bold text-base transition-all duration-200 cursor-pointer
+            className={`relative flex-1 py-3 px-4 rounded-xl font-bold transition-all duration-200 cursor-pointer
               ${activeTab === tab.id
-                ? 'bg-gradient-to-b from-amber-500/20 to-amber-600/10 text-amber-400 border border-amber-500/40 shadow-lg shadow-amber-500/10'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+                ? 'bg-amber-500/25 text-amber-400 text-lg border border-amber-500/50 shadow-lg shadow-amber-500/15'
+                : 'text-slate-400 text-base hover:text-slate-200 hover:bg-white/5 border border-transparent'
               }`}
           >
             {tab.label}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 bg-amber-400 rounded-full" />
+            )}
           </button>
         ))}
       </div>

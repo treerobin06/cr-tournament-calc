@@ -61,7 +61,7 @@ export function DistributionChart({ distribution, targetWins }: DistributionChar
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>胜场分布</span>
+        <span className="text-base font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>胜场分布</span>
         <Button
           variant="outline"
           size="sm"
@@ -71,7 +71,7 @@ export function DistributionChart({ distribution, targetWins }: DistributionChar
           {logScale ? "线性刻度" : "对数刻度"}
         </Button>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={350}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(76,29,149,0.3)" />
           <XAxis

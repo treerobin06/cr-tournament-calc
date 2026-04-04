@@ -62,13 +62,13 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const CANVAS_W = 500
-    const CANVAS_H = 300
+    const CANVAS_W = 560
+    const CANVAS_H = 340
     // 留边距给坐标轴标签
-    const MARGIN_LEFT = 48
-    const MARGIN_RIGHT = 12
-    const MARGIN_TOP = 12
-    const MARGIN_BOTTOM = 40
+    const MARGIN_LEFT = 56
+    const MARGIN_RIGHT = 16
+    const MARGIN_TOP = 16
+    const MARGIN_BOTTOM = 48
 
     const plotW = CANVAS_W - MARGIN_LEFT - MARGIN_RIGHT
     const plotH = CANVAS_H - MARGIN_TOP - MARGIN_BOTTOM
@@ -104,41 +104,56 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     })
 
     // 绘制 X 轴标签（参与人数）
-    ctx.fillStyle = "#94A3B8"
-    ctx.font = `${10 * Math.min(1, 1)}px sans-serif`
+    ctx.fillStyle = "#CBD5E1"
+    ctx.font = "bold 11px 'Nunito', sans-serif"
     ctx.textAlign = "center"
     // 选取 5 个刻度显示
     const xTickIndices = [0, 5, 9, 14, 19]
     xTickIndices.forEach((idx) => {
       if (idx >= N_VALUES.length) return
       const x = MARGIN_LEFT + idx * cellW + cellW / 2
+      const tickY = MARGIN_TOP + plotH
       const n = N_VALUES[idx]
       const label = n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : `${Math.round(n / 1000)}k`
-      ctx.fillText(label, x, CANVAS_H - MARGIN_BOTTOM + 14)
+      // 画刻度线
+      ctx.strokeStyle = "#64748B"
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(x, tickY)
+      ctx.lineTo(x, tickY + 4)
+      ctx.stroke()
+      ctx.fillText(label, x, tickY + 18)
     })
+    // X 轴标题
     ctx.textAlign = "center"
-    ctx.fillStyle = "#E2E8F0"
-    ctx.font = "11px sans-serif"
+    ctx.fillStyle = "#F59E0B"
+    ctx.font = "bold 12px 'Nunito', sans-serif"
     ctx.fillText("参与人数", MARGIN_LEFT + plotW / 2, CANVAS_H - 4)
 
     // 绘制 Y 轴标签（胜场数）
     ctx.textAlign = "right"
-    ctx.fillStyle = "#94A3B8"
-    ctx.font = "10px sans-serif"
-    // 每隔几行标一个
+    ctx.fillStyle = "#CBD5E1"
+    ctx.font = "bold 11px 'Nunito', sans-serif"
     WINS_VALUES.forEach((wins, rowIdx) => {
       if (wins % 2 !== 0 && wins !== WINS_MIN && wins !== WINS_MAX) return
-      const y = MARGIN_TOP + rowIdx * cellH + cellH / 2 + 3.5
-      ctx.fillText(`${wins}W`, MARGIN_LEFT - 4, y)
+      const y = MARGIN_TOP + rowIdx * cellH + cellH / 2 + 4
+      // 画刻度线
+      ctx.strokeStyle = "#64748B"
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(MARGIN_LEFT - 4, y - 4)
+      ctx.lineTo(MARGIN_LEFT, y - 4)
+      ctx.stroke()
+      ctx.fillText(`${wins}W`, MARGIN_LEFT - 6, y)
     })
 
     // Y 轴标题（旋转）
     ctx.save()
-    ctx.translate(10, MARGIN_TOP + plotH / 2)
+    ctx.translate(12, MARGIN_TOP + plotH / 2)
     ctx.rotate(-Math.PI / 2)
     ctx.textAlign = "center"
-    ctx.fillStyle = "#E2E8F0"
-    ctx.font = "11px sans-serif"
+    ctx.fillStyle = "#F59E0B"
+    ctx.font = "bold 12px 'Nunito', sans-serif"
     ctx.fillText("胜场数", 0, 0)
     ctx.restore()
   }, [rFull, alpha, params.targetRank, N_VALUES, WINS_VALUES])
@@ -156,7 +171,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
         <canvas
           ref={canvasRef}
           className="w-full rounded-xl border border-purple-900/40"
-          style={{ maxWidth: "500px", display: "block", margin: "0 auto" }}
+          style={{ maxWidth: "560px", display: "block", margin: "0 auto" }}
         />
 
         {/* 图例 */}

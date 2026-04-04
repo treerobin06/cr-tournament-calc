@@ -56,9 +56,9 @@ export function CumulativeRankChart({ distribution, targetRank }: CumulativeRank
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>累计排名曲线（对数刻度）</span>
+        <span className="text-base font-bold text-amber-400" style={{fontFamily:'Fredoka'}}>累计排名曲线（对数刻度）</span>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={350}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(76,29,149,0.3)" />
           <XAxis

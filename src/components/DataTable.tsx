@@ -76,16 +76,19 @@ export function DataTable({ distribution, params }: DataTableProps) {
                 </tr>
               </thead>
               <tbody>
-                {distribution.map((row, idx) => {
+                {distribution
+                  .filter((row) => row.count >= 0.5)
+                  .map((row) => {
                   // 绿色高亮：tailCount <= targetRank 的行（这些人能晋级）
-                  const isHighlighted = idx >= targetRankIdx && targetRankIdx >= 0
+                  const origIdx = distribution.indexOf(row)
+                  const isHighlighted = origIdx >= targetRankIdx && targetRankIdx >= 0
                   return (
                     <tr
                       key={row.wins}
                       className={`border-b border-purple-900/20 ${
                         isHighlighted
                           ? "bg-emerald-500/10"
-                          : idx % 2 === 0
+                          : row.wins % 2 === 0
                           ? "bg-white/[0.02]"
                           : ""
                       }`}

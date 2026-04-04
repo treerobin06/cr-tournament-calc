@@ -56,7 +56,7 @@ function App() {
             <PredictRank params={params} />
           </section>
 
-          {/* 2×2 Chart Grid */}
+          {/* 主要图表（分布 + 累计排名）— 全宽两列 */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
               <DistributionChart distribution={distribution} targetWins={targetWins} />
@@ -64,6 +64,10 @@ function App() {
             <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
               <CumulativeRankChart distribution={distribution} targetRank={params.targetRank} />
             </div>
+          </section>
+
+          {/* 次要图表（衰减比 + 热力图） */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-2xl bg-[#1E1C35] border border-purple-900/40 p-5">
               <DecayRatioChart distribution={distribution} />
             </div>
