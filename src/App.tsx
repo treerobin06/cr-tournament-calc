@@ -8,6 +8,8 @@ import { DecayRatioChart } from "@/components/DecayRatioChart"
 import { DataTable } from "@/components/DataTable"
 import { MathInsights } from "@/components/MathInsights"
 import { SimulationPanel } from "@/components/SimulationPanel"
+import { PredictRank } from "@/components/PredictRank"
+import { RobustnessHeatmap } from "@/components/RobustnessHeatmap"
 import { computeDistribution } from "@/lib/math"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -53,6 +55,11 @@ function App() {
             <QueryTabs params={params} />
           </section>
 
+          {/* 预测最终排名 */}
+          <section>
+            <PredictRank params={params} />
+          </section>
+
           {/* 2×2 Chart Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
@@ -70,42 +77,7 @@ function App() {
                 <DecayRatioChart distribution={distribution} />
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="pt-4">
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">当前参数摘要</span>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="text-muted-foreground">参与人数</div>
-                    <div className="font-medium text-right">{params.playerCount.toLocaleString()}</div>
-                    <div className="text-muted-foreground">命数</div>
-                    <div className="font-medium text-right">{params.lives} 命</div>
-                    <div className="text-muted-foreground">满局率</div>
-                    <div className="font-medium text-right">{(params.fullPlayRatio * 100).toFixed(0)}%</div>
-                    <div className="text-muted-foreground">有效人数</div>
-                    <div className="font-medium text-right">
-                      {Math.round(params.playerCount * params.fullPlayRatio).toLocaleString()}
-                    </div>
-                    <div className="text-muted-foreground">目标排名</div>
-                    <div className="font-medium text-right text-green-600">前 {params.targetRank.toLocaleString()}</div>
-                    <div className="text-muted-foreground">κ 参数</div>
-                    <div className="font-medium text-right">{params.kappa.toFixed(2)}</div>
-                    <div className="text-muted-foreground">rFull / α</div>
-                    <div className="font-medium text-right">
-                      {(() => {
-                        const { rFull, alpha } = paramsToMathArgs(params)
-                        return `${rFull} / ${alpha.toFixed(3)}`
-                      })()}
-                    </div>
-                    {targetWins !== undefined && (
-                      <>
-                        <div className="text-muted-foreground">95% 安全胜场</div>
-                        <div className="font-bold text-right text-green-600">{targetWins} 胜</div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <RobustnessHeatmap params={params} />
           </section>
 
           {/* Data Table */}
