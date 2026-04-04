@@ -7,28 +7,28 @@ interface RobustnessHeatmapProps {
   params: TournamentParams
 }
 
-// 颜色插值：红(危险) → 黄(边缘) → 绿(安全)
-function probToColor(prob: number): [number, number, number] {
-  // 绿：rgb(34, 197, 94)  prob >= 0.95
-  // 黄：rgb(234, 179, 8)  prob ≈ 0.5
-  // 红：rgb(239, 68, 68)  prob < 0.5
+// 颜色插值：柔和橙(危险) → 琥珀(边缘) → 青蓝(安全)
+function probToColor(prob: number): [number, number, number, number] {
+  let r: number, g: number, b: number, a: number
   if (prob >= 0.95) {
-    return [34, 197, 94]
+    // 柔和青蓝 sky-400
+    r = 56; g = 189; b = 248; a = 0.6
   } else if (prob >= 0.5) {
-    // 0.5 ~ 0.95 之间：从黄渐变到绿
+    // 琥珀到青蓝渐变
     const t = (prob - 0.5) / 0.45
-    const r = Math.round(234 + t * (34 - 234))
-    const g = Math.round(179 + t * (197 - 179))
-    const b = Math.round(8 + t * (94 - 8))
-    return [r, g, b]
+    r = Math.round(251 * (1 - t) + 56 * t)
+    g = Math.round(146 * (1 - t) + 189 * t)
+    b = Math.round(60 * (1 - t) + 248 * t)
+    a = 0.5 + 0.1 * t
   } else {
-    // 0 ~ 0.5：从红渐变到黄
+    // 柔和暖橙
     const t = prob / 0.5
-    const r = Math.round(239 + t * (234 - 239))
-    const g = Math.round(68 + t * (179 - 68))
-    const b = Math.round(68 + t * (8 - 68))
-    return [r, g, b]
+    r = Math.round(239 * (1 - t) + 251 * t)
+    g = Math.round(68 * (1 - t) + 146 * t)
+    b = Math.round(68 * (1 - t) + 60 * t)
+    a = 0.4 + 0.1 * t
   }
+  return [r, g, b, a]
 }
 
 // 生成对数刻度的 N 值（20 步，50,000 ~ 2,000,000）
@@ -92,8 +92,8 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     WINS_VALUES.forEach((wins, rowIdx) => {
       N_VALUES.forEach((n, colIdx) => {
         const prob = promotionProbability(wins, rFull, alpha, n, params.targetRank)
-        const [r, g, b] = probToColor(prob)
-        ctx.fillStyle = `rgb(${r},${g},${b})`
+        const [r, g, b, a] = probToColor(prob)
+        ctx.fillStyle = `rgba(${r},${g},${b},${a})`
         ctx.fillRect(
           MARGIN_LEFT + colIdx * cellW,
           MARGIN_TOP + rowIdx * cellH,
@@ -179,21 +179,21 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
-              style={{ backgroundColor: "rgb(34,197,94)" }}
+              style={{ backgroundColor: "rgba(56,189,248,0.6)" }}
             />
             <span>安全（≥95%）</span>
           </div>
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
-              style={{ backgroundColor: "rgb(234,179,8)" }}
+              style={{ backgroundColor: "rgba(251,146,60,0.5)" }}
             />
             <span>边缘（50%~95%）</span>
           </div>
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
-              style={{ backgroundColor: "rgb(239,68,68)" }}
+              style={{ backgroundColor: "rgba(239,68,68,0.4)" }}
             />
             <span>危险（&lt;50%）</span>
           </div>

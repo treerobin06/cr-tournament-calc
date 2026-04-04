@@ -1,6 +1,5 @@
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -55,10 +54,10 @@ export function paramsToMathArgs(params: TournamentParams): {
 /**
  * 对数滑块：将线性 [0,1] 映射到对数刻度 [min, max]
  */
-function logScale(value: number, min: number, max: number): number {
+export function logScale(value: number, min: number, max: number): number {
   return Math.round(Math.exp(Math.log(min) + value * (Math.log(max) - Math.log(min))))
 }
-function inverseLogScale(val: number, min: number, max: number): number {
+export function inverseLogScale(val: number, min: number, max: number): number {
   return (Math.log(val) - Math.log(min)) / (Math.log(max) - Math.log(min))
 }
 
@@ -74,55 +73,10 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
     onChange({ ...params, ...partial })
   }
 
-  // 对数滑块：playerCount
-  const LOG_MIN = 1000
-  const LOG_MAX = 5000000
-  const sliderVal = inverseLogScale(params.playerCount, LOG_MIN, LOG_MAX)
-
-  // kappa 对应的胜率（NegBin 均值 = r/r = 0.5 固定，但 kappa 影响分布形状）
-  // 显示提示：r 越大分布越集中，均值胜场 = r（因为 p=0.5 时 E[W]=r）
-  const expectedWins = params.kappa.toFixed(2)
-
   return (
     <div className="card-premium p-6 h-fit">
       <h2 className="section-title text-gold text-xl mb-6">参数配置</h2>
       <div className="space-y-6">
-        {/* 参与人数 */}
-        <div className="space-y-2">
-          <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
-            参与人数
-            <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
-              {params.playerCount.toLocaleString()}
-            </span>
-          </Label>
-          <div className="flex items-center gap-2">
-            <Slider
-              className="flex-1"
-              min={0}
-              max={1}
-              step={0.001}
-              value={[sliderVal]}
-              onValueChange={([v]) => update({ playerCount: logScale(v, LOG_MIN, LOG_MAX) })}
-              aria-label="参与人数"
-            />
-          </div>
-          <Input
-            id="player-count-input"
-            type="number"
-            value={params.playerCount}
-            min={1000}
-            max={5000000}
-            onChange={(e) => {
-              const v = parseInt(e.target.value)
-              if (!isNaN(v) && v >= 1000 && v <= 5000000) {
-                update({ playerCount: v })
-              }
-            }}
-            className="h-8 text-sm"
-            aria-label="参与人数（精确输入）"
-          />
-        </div>
-
         {/* 命数（失败次数上限） */}
         <div className="space-y-2">
           <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">命数（最大失败次数）</Label>
@@ -164,23 +118,6 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
           </p>
         </div>
 
-        {/* 目标排名 */}
-        <div className="space-y-2">
-          <Label htmlFor="target-rank-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">目标排名</Label>
-          <Input
-            id="target-rank-input"
-            type="number"
-            value={params.targetRank}
-            min={1}
-            max={100000}
-            onChange={(e) => {
-              const v = parseInt(e.target.value)
-              if (!isNaN(v) && v >= 1) update({ targetRank: v })
-            }}
-            className="h-8 text-sm"
-          />
-        </div>
-
         {/* 高级选项 */}
         <div className="border-t border-purple-900/20 pt-4">
           <button
@@ -191,11 +128,14 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             高级选项
           </button>
           {showAdvanced && (
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 space-y-3">
               <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
-                κ（分布形状参数）
-                <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
-                  {params.kappa.toFixed(2)}
+                玩家实力差异
+                <span className="ml-2 text-base font-semibold text-slate-200 normal-case tracking-normal">
+                  {params.kappa === 0 ? '无差异（纯运气）' :
+                   params.kappa < 0.5 ? '微弱' :
+                   params.kappa < 1.0 ? '中等' :
+                   params.kappa < 2.0 ? '显著' : '极大'}
                 </span>
               </Label>
               <Slider
@@ -204,13 +144,15 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
                 step={1}
                 value={[Math.round(params.kappa * 100)]}
                 onValueChange={([v]) => update({ kappa: v / 100 })}
-                aria-label="κ 分布形状参数"
+                aria-label="玩家实力差异（κ）"
               />
               <p className="text-xs text-slate-400">
-                期望胜场 ≈ <strong>{expectedWins}</strong>（NegBin r 参数）
+                κ = {params.kappa.toFixed(2)}。
+                {params.kappa > 0 && `顶尖玩家(+2σ) vs 普通玩家胜率 ≈ ${Math.round(100 / (1 + Math.exp(-2 * params.kappa)))}%`}
+                {params.kappa === 0 && '所有人胜率均为 50%，纯靠运气'}
               </p>
-              <p className="text-xs text-slate-400">
-                κ 越大 → 分布越平缓，高胜场玩家越多
+              <p className="text-xs text-slate-500">
+                此参数仅在蒙特卡罗模拟中生效。理论计算始终假设 50% 胜率。
               </p>
             </div>
           )}

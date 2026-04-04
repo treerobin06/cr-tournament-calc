@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react"
-import { ParameterPanel, DEFAULT_PARAMS, paramsToMathArgs } from "@/components/ParameterPanel"
+import { ParameterPanel, DEFAULT_PARAMS, paramsToMathArgs, logScale, inverseLogScale } from "@/components/ParameterPanel"
 import type { TournamentParams } from "@/components/ParameterPanel"
 import { QueryTabs } from "@/components/QueryTabs"
 import { DistributionChart } from "@/components/DistributionChart"
@@ -10,7 +10,13 @@ import { MathInsights } from "@/components/MathInsights"
 import { SimulationPanel } from "@/components/SimulationPanel"
 import { PredictRank } from "@/components/PredictRank"
 import { RobustnessHeatmap } from "@/components/RobustnessHeatmap"
+import { Slider } from "@/components/ui/slider"
+import { Input } from "@/components/ui/input"
 import { computeDistribution } from "@/lib/math"
+// 对数滑块常量
+const PLAYER_LOG_MIN = 1000
+const PLAYER_LOG_MAX = 5000000
+
 function App() {
   const [params, setParams] = useState<TournamentParams>(DEFAULT_PARAMS)
 
@@ -24,6 +30,13 @@ function App() {
     const row = distribution.find((r) => r.tailCount <= params.targetRank)
     return row?.wins
   }, [distribution, params.targetRank])
+
+  const updateParams = (partial: Partial<TournamentParams>) => {
+    setParams(prev => ({ ...prev, ...partial }))
+  }
+
+  // 对数滑块当前位置
+  const playerSliderVal = inverseLogScale(params.playerCount, PLAYER_LOG_MIN, PLAYER_LOG_MAX)
 
   return (
     <div className="min-h-screen">
@@ -46,6 +59,59 @@ function App() {
 
         {/* Right Main Area */}
         <main className="flex-1 min-w-0 space-y-8">
+          {/* 参赛人数 & 目标排名 — 查询区域输入栏 */}
+          <section className="card-premium p-5">
+            <div className="flex items-start gap-8 flex-wrap">
+              {/* 参赛人数 */}
+              <div className="flex-1 min-w-[280px] space-y-2">
+                <div className="flex items-center gap-3">
+                  <label className="text-xs font-medium tracking-wide uppercase text-slate-400 whitespace-nowrap">参赛人数</label>
+                  <span className="text-lg font-semibold text-slate-200">{params.playerCount.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Slider
+                    className="flex-1"
+                    min={0}
+                    max={1}
+                    step={0.001}
+                    value={[playerSliderVal]}
+                    onValueChange={([v]) => updateParams({ playerCount: logScale(v, PLAYER_LOG_MIN, PLAYER_LOG_MAX) })}
+                    aria-label="参赛人数"
+                  />
+                  <Input
+                    type="number"
+                    value={params.playerCount}
+                    min={1000}
+                    max={5000000}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value)
+                      if (!isNaN(v) && v >= 1000 && v <= 5000000) {
+                        updateParams({ playerCount: v })
+                      }
+                    }}
+                    className="w-28 h-8 text-sm"
+                    aria-label="参赛人数（精确输入）"
+                  />
+                </div>
+              </div>
+              {/* 目标排名 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium tracking-wide uppercase text-slate-400 whitespace-nowrap">目标排名</label>
+                <Input
+                  type="number"
+                  value={params.targetRank}
+                  min={1}
+                  max={100000}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value)
+                    if (!isNaN(v) && v >= 1) updateParams({ targetRank: v })
+                  }}
+                  className="w-28 h-8 text-sm"
+                />
+              </div>
+            </div>
+          </section>
+
           {/* Query Tabs */}
           <section>
             <QueryTabs params={params} />
