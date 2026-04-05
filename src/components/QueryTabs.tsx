@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import {
   queryRankFromWins,
   queryWinsToRank,
@@ -72,31 +71,28 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
   return (
     <div className="space-y-3">
-      {/* Tab Bar — 游戏风格分段控件 */}
-      <div className="flex gap-1 p-1.5 rounded-2xl bg-[#0c0b1a] border-b-2 border-amber-500/10">
+      {/* Tab Bar — KAWE.SKI 风格按钮 */}
+      <div className="flex gap-3 flex-wrap">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex-1 py-3.5 px-6 rounded-xl font-semibold text-[15px] tracking-wide transition-all duration-300 cursor-pointer
+            className={`px-5 py-2.5 rounded-full font-bold text-sm border-2 transition-all duration-200 cursor-pointer
               ${activeTab === tab.id
-                ? 'bg-gradient-to-b from-amber-500/25 to-amber-600/10 text-amber-400 shadow-lg border-2 border-amber-500/40 shadow-[inset_0_0_12px_rgba(245,158,11,0.08)]'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+                ? 'bg-amber-100 border-black text-black shadow-[2px_2px_0px_#1A1A1A]'
+                : 'bg-white border-gray-300 text-gray-600 hover:border-black hover:text-black'
               }`}
           >
             {tab.label}
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 bg-amber-400 rounded-full" />
-            )}
           </button>
         ))}
       </div>
 
       {/* 模式1：给定胜场，查询期望排名 */}
       {activeTab === 'mode1' && (
-        <div className="card-premium p-6 space-y-4">
+        <div className="cr-card space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="mode1-wins-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">胜场数</Label>
+            <Label htmlFor="mode1-wins-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">胜场数</Label>
             <Input
               id="mode1-wins-input"
               type="number"
@@ -111,36 +107,41 @@ export function QueryTabs({ params }: QueryTabsProps) {
           {rankResult && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-purple-900/30 bg-purple-500/5 p-4 text-center">
+                <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number text-2xl">
                     #{rankResult.optimisticRank.toLocaleString()}
                   </div>
-                  <div className="text-xs text-slate-400 mt-2 font-medium tracking-wide">乐观排名（期望）</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">乐观排名（期望）</div>
                 </div>
-                <div className="rounded-xl border border-purple-900/30 bg-purple-500/5 p-4 text-center">
+                <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number text-2xl">
                     #{rankResult.conservativeRank.toLocaleString()}
                   </div>
-                  <div className="text-xs text-slate-400 mt-2 font-medium tracking-wide">保守排名（95% 置信）</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">保守排名（95% 置信）</div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-400">晋级概率：</span>
-                <Badge
-                  variant={promoProb >= 0.95 ? "default" : promoProb >= 0.5 ? "secondary" : "destructive"}
-                  className={`text-sm ${promoProb >= 0.95 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : promoProb >= 0.5 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}
+                <span className="text-sm text-gray-500">晋级概率：</span>
+                <span
+                  className={
+                    promoProb >= 0.95
+                      ? 'badge-safe'
+                      : promoProb >= 0.5
+                      ? 'badge-gold'
+                      : 'badge-danger'
+                  }
                 >
                   {(promoProb * 100).toFixed(1)}%
-                </Badge>
-                <span className="text-xs text-slate-400">
+                </span>
+                <span className="text-xs text-gray-500">
                   （进入前 {params.targetRank.toLocaleString()} 名）
                 </span>
               </div>
 
-              <div className="text-sm text-slate-400">
+              <div className="text-sm text-gray-500">
                 百分位：你超过了{" "}
-                <strong className="text-slate-200">{rankResult.percentile.toFixed(1)}%</strong> 的玩家
+                <strong className="text-gray-900">{rankResult.percentile.toFixed(1)}%</strong> 的玩家
               </div>
             </div>
           )}
@@ -149,11 +150,11 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
       {/* 模式2：名次→胜场，概率条 */}
       {activeTab === 'mode2' && (
-        <div className="card-premium p-6 space-y-4">
-          <div className="text-sm text-slate-400">
-            目标排名：<strong className="text-slate-200">前 {params.targetRank.toLocaleString()} 名</strong>
+        <div className="cr-card space-y-4">
+          <div className="text-sm text-gray-500">
+            目标排名：<strong className="text-gray-900">前 {params.targetRank.toLocaleString()} 名</strong>
             所需胜场分析（95% 安全胜场：
-            <strong className="text-emerald-400 ml-1">
+            <strong className="text-emerald-600 ml-1">
               {winsToRankResult.safeWins} 胜
             </strong>
             ）
@@ -165,7 +166,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
               .filter((_, i, arr) => i <= arr.findIndex(r => r.wins === winsToRankResult.safeWins) + 5)
               .map(({ wins, probability }) => (
                 <div key={wins} className="flex items-center gap-2">
-                  <span className="w-16 text-xs text-right text-slate-400 shrink-0">
+                  <span className="w-16 text-xs text-right text-gray-500 shrink-0">
                     {wins} 胜
                   </span>
                   <div className="flex-1 prob-bar">
@@ -174,21 +175,21 @@ export function QueryTabs({ params }: QueryTabsProps) {
                         wins === winsToRankResult.safeWins
                           ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
                           : probability >= 0.95
-                          ? "bg-gradient-to-r from-emerald-500/80 to-emerald-400/80"
+                          ? "bg-gradient-to-r from-emerald-400 to-emerald-300"
                           : probability >= 0.5
-                          ? "bg-gradient-to-r from-amber-500 to-amber-400"
-                          : "bg-gradient-to-r from-red-500 to-red-400"
+                          ? "bg-gradient-to-r from-amber-400 to-amber-300"
+                          : "bg-gradient-to-r from-red-400 to-red-300"
                       }`}
                       style={{ width: `${Math.min(probability * 100, 100)}%` }}
                     />
                   </div>
-                  <span className="w-16 text-xs text-slate-400 shrink-0">
+                  <span className="w-16 text-xs text-gray-500 shrink-0">
                     {(probability * 100).toFixed(1)}%
                   </span>
                   {wins === winsToRankResult.safeWins && (
-                    <Badge variant="outline" className="text-xs shrink-0 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span className="badge-safe text-xs shrink-0">
                       95% 安全
-                    </Badge>
+                    </span>
                   )}
                 </div>
               ))}
@@ -198,10 +199,10 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
       {/* 模式3：鲁棒性分析 */}
       {activeTab === 'mode3' && (
-        <div className="card-premium p-6 space-y-4">
+        <div className="cr-card space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label htmlFor="mode3-wins-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">胜场数</Label>
+              <Label htmlFor="mode3-wins-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">胜场数</Label>
               <Input
                 id="mode3-wins-input"
                 type="number"
@@ -212,7 +213,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="mode3-n-min-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">N 最小值</Label>
+              <Label htmlFor="mode3-n-min-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">N 最小值</Label>
               <Input
                 id="mode3-n-min-input"
                 type="number"
@@ -223,7 +224,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="mode3-n-max-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">N 最大值</Label>
+              <Label htmlFor="mode3-n-max-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">N 最大值</Label>
               <Input
                 id="mode3-n-max-input"
                 type="number"
@@ -236,23 +237,21 @@ export function QueryTabs({ params }: QueryTabsProps) {
           </div>
 
           <div className="space-y-1">
-            <div className="grid grid-cols-3 text-xs text-slate-400 font-semibold pb-1 border-b border-purple-900/40">
+            <div className="grid grid-cols-3 text-xs text-gray-900 font-bold pb-1 border-b-2 border-black">
               <span>参与人数</span>
               <span>晋级概率</span>
               <span>状态</span>
             </div>
             {sweepPoints.map(({ N, prob, safe }) => (
               <div key={N} className="grid grid-cols-3 text-sm py-0.5">
-                <span className="text-slate-300">{N.toLocaleString()}</span>
-                <span className={safe ? "text-emerald-400 font-medium" : "text-red-400 font-medium"}>
+                <span className="text-gray-700">{N.toLocaleString()}</span>
+                <span className={safe ? "text-emerald-600 font-medium" : "text-red-600 font-medium"}>
                   {(prob * 100).toFixed(1)}%
                 </span>
                 <span>
-                  <Badge
-                    className={`text-xs ${safe ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}
-                  >
+                  <span className={safe ? 'badge-safe text-xs' : 'badge-danger text-xs'}>
                     {safe ? "安全" : "危险"}
-                  </Badge>
+                  </span>
                 </span>
               </div>
             ))}
@@ -262,9 +261,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
       {/* 模式4：安全人数上限 */}
       {activeTab === 'mode4' && (
-        <div className="card-premium p-6 space-y-4">
+        <div className="cr-card space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="mode4-wins-input" className="text-xs font-medium tracking-wide uppercase text-slate-400">胜场数</Label>
+            <Label htmlFor="mode4-wins-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">胜场数</Label>
             <Input
               id="mode4-wins-input"
               type="number"
@@ -277,30 +276,30 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
           {safeCount && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-gray-500">
                 {wins4} 胜能稳进前 {params.targetRank.toLocaleString()} 名的最大参与人数：
               </p>
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl border border-purple-900/30 bg-purple-500/5 p-4 text-center">
+                <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number text-xl">
                     {safeCount.maxPlayers80.toLocaleString()}
                   </div>
-                  <div className="text-xs text-slate-400 mt-2 font-medium tracking-wide">80% 置信</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">80% 置信</div>
                 </div>
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-center">
+                <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-center">
                   <div className="stat-number text-xl">
                     {safeCount.maxPlayers.toLocaleString()}
                   </div>
-                  <div className="text-xs text-slate-400 mt-2 font-medium tracking-wide">95% 置信</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">95% 置信</div>
                 </div>
-                <div className="rounded-xl border border-purple-900/30 bg-purple-500/5 p-4 text-center">
+                <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number text-xl">
                     {safeCount.maxPlayers99.toLocaleString()}
                   </div>
-                  <div className="text-xs text-slate-400 mt-2 font-medium tracking-wide">99% 置信</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">99% 置信</div>
                 </div>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-gray-500">
                 即：当参与人数不超过上述数值时，{wins4} 胜有对应置信度能进入前{" "}
                 {params.targetRank.toLocaleString()} 名
               </p>

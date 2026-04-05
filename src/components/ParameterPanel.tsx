@@ -74,12 +74,12 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
   }
 
   return (
-    <div className="card-premium p-6 h-fit">
-      <h2 className="section-title text-gold text-xl mb-6">参数配置</h2>
+    <div className="cr-card h-fit">
+      <h2 className="section-title text-xl mb-6">参数配置</h2>
       <div className="space-y-6">
         {/* 命数（失败次数上限） */}
         <div className="space-y-2">
-          <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">命数（最大失败次数）</Label>
+          <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">命数（最大失败次数）</Label>
           <Select
             value={String(params.lives)}
             onValueChange={(v) => update({ lives: parseInt(v) })}
@@ -99,9 +99,9 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
 
         {/* 满局率 */}
         <div className="space-y-2">
-          <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
+          <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">
             满局率
-            <span className="ml-2 text-lg font-semibold text-slate-200 normal-case tracking-normal">
+            <span className="ml-2 text-lg font-semibold text-gray-900 normal-case tracking-normal">
               {(params.fullPlayRatio * 100).toFixed(0)}%
             </span>
           </Label>
@@ -113,25 +113,25 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             onValueChange={([v]) => update({ fullPlayRatio: v / 100 })}
             aria-label="满局率"
           />
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-gray-500">
             真正打完比赛的玩家比例
           </p>
         </div>
 
         {/* 高级选项 */}
-        <div className="border-t border-purple-900/20 pt-4">
+        <div className="border-t border-gray-200 pt-4">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-sm text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+            className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 transition-colors cursor-pointer"
           >
             <span>{showAdvanced ? "▾" : "▸"}</span>
             高级选项
           </button>
           {showAdvanced && (
             <div className="mt-3 space-y-3">
-              <Label className="text-xs font-medium tracking-wide uppercase text-slate-400">
+              <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">
                 玩家实力差异
-                <span className="ml-2 text-base font-semibold text-slate-200 normal-case tracking-normal">
+                <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
                   {params.kappa === 0 ? '无差异（纯运气）' :
                    params.kappa < 0.5 ? '微弱' :
                    params.kappa < 1.0 ? '中等' :
@@ -146,12 +146,12 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
                 onValueChange={([v]) => update({ kappa: v / 100 })}
                 aria-label="玩家实力差异（κ）"
               />
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-gray-500">
                 κ = {params.kappa.toFixed(2)}。
                 {params.kappa > 0 && `顶尖玩家(+2σ) vs 普通玩家胜率 ≈ ${Math.round(100 / (1 + Math.exp(-2 * params.kappa)))}%`}
                 {params.kappa === 0 && '所有人胜率均为 50%，纯靠运气'}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-gray-400">
                 此参数仅在蒙特卡罗模拟中生效。理论计算始终假设 50% 胜率。
               </p>
             </div>

@@ -30,13 +30,13 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null
   const row = payload[0].payload as DistributionRow
   return (
-    <div className="bg-[#1E1C35] border border-purple-900/40 rounded-xl p-2 shadow-lg text-xs space-y-1">
-      <div className="font-semibold text-amber-400">{row.wins} 胜</div>
-      <div className="text-slate-400">
-        累计人数（≥{row.wins} 胜）：<strong>{Math.round(row.tailCount).toLocaleString()}</strong>
+    <div className="bg-white border-2 border-black rounded-xl p-2 shadow-[2px_2px_0px_#1A1A1A] text-xs space-y-1">
+      <div className="font-semibold text-blue-600">{row.wins} 胜</div>
+      <div className="text-gray-500">
+        累计人数（≥{row.wins} 胜）：<strong className="text-gray-900">{Math.round(row.tailCount).toLocaleString()}</strong>
       </div>
-      <div className="text-muted-foreground">
-        约为第 <strong className="text-slate-200">{Math.round(row.tailCount).toLocaleString()}</strong> 名
+      <div className="text-gray-500">
+        约为第 <strong className="text-gray-900">{Math.round(row.tailCount).toLocaleString()}</strong> 名
       </div>
     </div>
   )
@@ -56,46 +56,40 @@ export function CumulativeRankChart({ distribution, targetRank }: CumulativeRank
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="section-title text-gold text-base">累计排名曲线（对数刻度）</span>
+        <span className="section-title text-base">累计排名曲线（对数刻度）</span>
       </div>
       <ResponsiveContainer width="100%" height={380}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-          <defs>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#7C3AED" />
-              <stop offset="100%" stopColor="#A78BFA" />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,58,237,0.08)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
           <XAxis
             dataKey="wins"
-            tick={{ fontSize: 12, fill: '#64748B' }}
-            label={{ value: "胜场数", position: "insideBottom", offset: -2, fontSize: 12, fill: '#64748B' }}
+            tick={{ fontSize: 12, fill: '#6B7280' }}
+            label={{ value: "胜场数", position: "insideBottom", offset: -2, fontSize: 12, fill: '#6B7280' }}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: '#64748B' }}
+            tick={{ fontSize: 12, fill: '#6B7280' }}
             tickFormatter={(v) => `10^${v.toFixed(0)}`}
-            label={{ value: "log₁₀(累计人数)", angle: -90, position: "insideLeft", fontSize: 11, fill: '#64748B' }}
+            label={{ value: "log₁₀(累计人数)", angle: -90, position: "insideLeft", fontSize: 11, fill: '#6B7280' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine
             y={targetLogRank}
-            stroke="#F59E0B"
+            stroke="#DC2626"
             strokeDasharray="4 2"
             label={{
               value: `前 ${targetRank.toLocaleString()} 名`,
               position: "right",
               fontSize: 10,
-              fill: "#F59E0B",
+              fill: "#DC2626",
             }}
           />
           <Line
             type="monotone"
             dataKey="logTailCount"
-            stroke="url(#lineGradient)"
+            stroke="#2563EB"
             strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 5, fill: '#A78BFA', stroke: '#7C3AED', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#2563EB', stroke: '#1D4ED8', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

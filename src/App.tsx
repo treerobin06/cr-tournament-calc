@@ -40,17 +40,21 @@ function App() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* 顶部装饰渐变条 */}
-      <div className="h-1 bg-gradient-to-r from-amber-500 via-purple-500 to-amber-500" />
+      {/* 金色装饰条 */}
+      <div className="gold-bar" />
 
       {/* Header */}
-      <header className="px-4 sm:px-8 py-7 border-b border-purple-900/20">
-        <h1 className="text-4xl font-bold text-gold section-title">
-          皇室战争锦标赛排名计算器
-        </h1>
-        <p className="text-sm text-slate-400 mt-2 tracking-wide">
-          基于负二项分布的理论估算 · 输出为参考区间，非精确预测
-        </p>
+      <header className="px-4 sm:px-8 py-6 bg-white/80 backdrop-blur-sm border-b-2 border-black">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold section-title">
+              ⚔️ 皇室战争锦标赛排名计算器
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              基于负二项分布的理论估算 · 输出为参考区间，非精确预测
+            </p>
+          </div>
+        </div>
       </header>
 
       {/* Main Layout — 窄屏垂直堆叠，宽屏侧边栏 */}
@@ -63,13 +67,13 @@ function App() {
         {/* Right Main Area */}
         <main className="flex-1 min-w-0 space-y-8">
           {/* 参赛人数 & 目标排名 — 查询区域输入栏 */}
-          <section className="card-premium p-5">
+          <section className="cr-card">
             <div className="flex items-start gap-8 flex-wrap">
               {/* 参赛人数 */}
               <div className="flex-1 min-w-[280px] space-y-2">
                 <div className="flex items-center gap-3">
-                  <label className="text-xs font-medium tracking-wide uppercase text-slate-400 whitespace-nowrap">参赛人数</label>
-                  <span className="text-lg font-semibold text-slate-200">{params.playerCount.toLocaleString()}</span>
+                  <label className="text-xs font-medium tracking-wide uppercase text-gray-500 whitespace-nowrap">参赛人数</label>
+                  <span className="text-lg font-semibold text-gray-900">{params.playerCount.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Slider
@@ -99,7 +103,7 @@ function App() {
               </div>
               {/* 目标排名 */}
               <div className="space-y-2">
-                <label className="text-xs font-medium tracking-wide uppercase text-slate-400 whitespace-nowrap">目标排名</label>
+                <label className="text-xs font-medium tracking-wide uppercase text-gray-500 whitespace-nowrap">目标排名</label>
                 <Input
                   type="number"
                   value={params.targetRank}
@@ -127,17 +131,17 @@ function App() {
 
           {/* 主要图表（分布 + 累计排名）— 全宽两列 */}
           <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="card-premium p-6">
+            <div className="cr-card">
               <DistributionChart distribution={distribution} targetWins={targetWins} />
             </div>
-            <div className="card-premium p-6">
+            <div className="cr-card">
               <CumulativeRankChart distribution={distribution} targetRank={params.targetRank} />
             </div>
           </section>
 
           {/* 次要图表（衰减比 + 热力图） */}
           <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="card-premium p-6">
+            <div className="cr-card">
               <DecayRatioChart distribution={distribution} />
             </div>
             <RobustnessHeatmap params={params} />

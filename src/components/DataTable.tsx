@@ -25,16 +25,16 @@ export function DataTable({ distribution, params }: DataTableProps) {
   return (
     <div className="space-y-6">
       {/* 关键节点表 */}
-      <div className="card-premium p-6">
-        <h3 className="section-title text-gold text-base mb-4">关键排名节点（95% 置信胜场数）</h3>
+      <div className="cr-card">
+        <h3 className="section-title text-base mb-4">关键排名节点（95% 置信胜场数）</h3>
         <div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-purple-900/20">
-                  <th className="text-left py-2 pr-4 text-xs font-semibold uppercase tracking-wider text-amber-400/80">目标名次</th>
+                <tr className="border-b-2 border-black bg-gray-50">
+                  <th className="text-left py-2 pr-4 text-xs font-bold uppercase tracking-wider text-gray-900">目标名次</th>
                   {KEY_RANKS.map((rank) => (
-                    <th key={rank} className="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-amber-400/80">
+                    <th key={rank} className="text-center py-2 px-2 text-xs font-bold uppercase tracking-wider text-gray-900">
                       前 {rank >= 1000 ? `${rank / 1000}k` : rank}
                     </th>
                   ))}
@@ -42,12 +42,12 @@ export function DataTable({ distribution, params }: DataTableProps) {
               </thead>
               <tbody>
                 <tr>
-                  <td className="py-1.5 pr-4 text-slate-400">95% 安全胜场</td>
+                  <td className="py-1.5 pr-4 text-gray-500">95% 安全胜场</td>
                   {keyNodes.map(({ rank, safeWins }) => (
                     <td
                       key={rank}
                       className={`text-center py-1.5 px-2 font-bold ${
-                        rank === params.targetRank ? "text-amber-400 bg-amber-500/10" : "text-slate-200"
+                        rank === params.targetRank ? "text-amber-600 bg-amber-50" : "text-gray-900"
                       }`}
                     >
                       {safeWins} 胜
@@ -61,18 +61,18 @@ export function DataTable({ distribution, params }: DataTableProps) {
       </div>
 
       {/* 完整分布表 */}
-      <div className="card-premium p-6">
-        <h3 className="section-title text-gold text-base mb-4">完整分布表</h3>
+      <div className="cr-card">
+        <h3 className="section-title text-base mb-4">完整分布表</h3>
         <div>
           <div className="overflow-auto max-h-80">
             <table className="w-full text-xs">
-              <thead className="sticky top-0" style={{ background: 'linear-gradient(180deg, rgba(30, 28, 53, 0.98), rgba(22, 20, 45, 0.98))' }}>
-                <tr className="border-b border-purple-900/20">
-                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">胜场</th>
-                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">预期人数</th>
-                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">累计人数</th>
-                  <th className="text-right py-2 pr-3 text-xs font-semibold uppercase tracking-wider text-amber-400/80">累计概率</th>
-                  <th className="text-right py-2 text-xs font-semibold uppercase tracking-wider text-amber-400/80">衰减比</th>
+              <thead className="sticky top-0 bg-gray-50">
+                <tr className="border-b-2 border-black">
+                  <th className="text-right py-2 pr-3 text-xs font-bold uppercase tracking-wider text-gray-900">胜场</th>
+                  <th className="text-right py-2 pr-3 text-xs font-bold uppercase tracking-wider text-gray-900">预期人数</th>
+                  <th className="text-right py-2 pr-3 text-xs font-bold uppercase tracking-wider text-gray-900">累计人数</th>
+                  <th className="text-right py-2 pr-3 text-xs font-bold uppercase tracking-wider text-gray-900">累计概率</th>
+                  <th className="text-right py-2 text-xs font-bold uppercase tracking-wider text-gray-900">衰减比</th>
                 </tr>
               </thead>
               <tbody>
@@ -85,25 +85,25 @@ export function DataTable({ distribution, params }: DataTableProps) {
                   return (
                     <tr
                       key={row.wins}
-                      className={`border-b border-purple-900/10 transition-colors duration-150 hover:bg-purple-500/5 ${
+                      className={`border-b border-gray-200 transition-colors duration-150 hover:bg-amber-50 ${
                         isHighlighted
-                          ? "bg-emerald-500/5 border-l-2 border-l-emerald-400"
+                          ? "bg-emerald-50 border-l-3 border-l-emerald-500"
                           : row.wins % 2 === 0
-                          ? "bg-white/[0.02]"
+                          ? "bg-gray-50"
                           : ""
                       }`}
                     >
-                      <td className="text-right py-1 pr-3 font-medium text-slate-200">{row.wins}</td>
-                      <td className="text-right py-1 pr-3 text-slate-400">
+                      <td className="text-right py-1 pr-3 font-medium text-gray-900">{row.wins}</td>
+                      <td className="text-right py-1 pr-3 text-gray-500">
                         {Math.round(row.count).toLocaleString()}
                       </td>
-                      <td className={`text-right py-1 pr-3 font-medium ${isHighlighted ? "text-emerald-400" : "text-slate-300"}`}>
+                      <td className={`text-right py-1 pr-3 font-medium ${isHighlighted ? "text-emerald-600" : "text-gray-700"}`}>
                         {Math.round(row.tailCount).toLocaleString()}
                       </td>
-                      <td className="text-right py-1 pr-3 text-slate-400">
+                      <td className="text-right py-1 pr-3 text-gray-500">
                         {(row.tailProb * 100).toFixed(2)}%
                       </td>
-                      <td className="text-right py-1 text-slate-400">
+                      <td className="text-right py-1 text-gray-500">
                         {isNaN(row.decayRatio) ? "—" : `${(row.decayRatio * 100).toFixed(1)}%`}
                       </td>
                     </tr>
@@ -112,7 +112,7 @@ export function DataTable({ distribution, params }: DataTableProps) {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-400 mt-2">
+          <p className="text-xs text-gray-500 mt-2">
             绿色高亮行：累计人数 ≤ 目标排名（{params.targetRank.toLocaleString()}），即该胜场可晋级
           </p>
         </div>

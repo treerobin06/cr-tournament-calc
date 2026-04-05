@@ -7,26 +7,26 @@ interface RobustnessHeatmapProps {
   params: TournamentParams
 }
 
-// 颜色插值：柔和橙(危险) → 琥珀(边缘) → 青蓝(安全)
+// 颜色插值：亮色主题下 amber-to-blue 渐变
 function probToColor(prob: number): [number, number, number, number] {
   let r: number, g: number, b: number, a: number
   if (prob >= 0.95) {
-    // 柔和青蓝 sky-400
-    r = 56; g = 189; b = 248; a = 0.6
+    // 蓝色（安全）
+    r = 37; g = 99; b = 235; a = 0.7
   } else if (prob >= 0.5) {
-    // 琥珀到青蓝渐变
+    // amber 到蓝色渐变
     const t = (prob - 0.5) / 0.45
-    r = Math.round(251 * (1 - t) + 56 * t)
-    g = Math.round(146 * (1 - t) + 189 * t)
-    b = Math.round(60 * (1 - t) + 248 * t)
-    a = 0.5 + 0.1 * t
+    r = Math.round(245 * (1 - t) + 37 * t)
+    g = Math.round(158 * (1 - t) + 99 * t)
+    b = Math.round(11 * (1 - t) + 235 * t)
+    a = 0.6 + 0.1 * t
   } else {
-    // 柔和暖橙
+    // 红到 amber 渐变
     const t = prob / 0.5
-    r = Math.round(239 * (1 - t) + 251 * t)
-    g = Math.round(68 * (1 - t) + 146 * t)
-    b = Math.round(68 * (1 - t) + 60 * t)
-    a = 0.4 + 0.1 * t
+    r = Math.round(220 * (1 - t) + 245 * t)
+    g = Math.round(38 * (1 - t) + 158 * t)
+    b = Math.round(38 * (1 - t) + 11 * t)
+    a = 0.5 + 0.1 * t
   }
   return [r, g, b, a]
 }
@@ -84,8 +84,8 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     canvas.style.height = `${CANVAS_H}px`
     ctx.scale(dpr, dpr)
 
-    // 背景
-    ctx.fillStyle = "#1E1C35"
+    // 白色背景
+    ctx.fillStyle = "#FFFFFF"
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
     // 绘制热力图格子
@@ -104,7 +104,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     })
 
     // 绘制 X 轴标签（参与人数）
-    ctx.fillStyle = "#CBD5E1"
+    ctx.fillStyle = "#374151"
     ctx.font = "bold 11px 'Nunito', sans-serif"
     ctx.textAlign = "center"
     // 选取 5 个刻度显示
@@ -116,7 +116,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
       const n = N_VALUES[idx]
       const label = n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : `${Math.round(n / 1000)}k`
       // 画刻度线
-      ctx.strokeStyle = "#64748B"
+      ctx.strokeStyle = "#9CA3AF"
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(x, tickY)
@@ -126,19 +126,19 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     })
     // X 轴标题
     ctx.textAlign = "center"
-    ctx.fillStyle = "#F59E0B"
+    ctx.fillStyle = "#1A1A1A"
     ctx.font = "bold 12px 'Nunito', sans-serif"
     ctx.fillText("参与人数", MARGIN_LEFT + plotW / 2, CANVAS_H - 4)
 
     // 绘制 Y 轴标签（胜场数）
     ctx.textAlign = "right"
-    ctx.fillStyle = "#CBD5E1"
+    ctx.fillStyle = "#374151"
     ctx.font = "bold 11px 'Nunito', sans-serif"
     WINS_VALUES.forEach((wins, rowIdx) => {
       if (wins % 2 !== 0 && wins !== WINS_MIN && wins !== WINS_MAX) return
       const y = MARGIN_TOP + rowIdx * cellH + cellH / 2 + 4
       // 画刻度线
-      ctx.strokeStyle = "#64748B"
+      ctx.strokeStyle = "#9CA3AF"
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(MARGIN_LEFT - 4, y - 4)
@@ -152,48 +152,48 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     ctx.translate(12, MARGIN_TOP + plotH / 2)
     ctx.rotate(-Math.PI / 2)
     ctx.textAlign = "center"
-    ctx.fillStyle = "#F59E0B"
+    ctx.fillStyle = "#1A1A1A"
     ctx.font = "bold 12px 'Nunito', sans-serif"
     ctx.fillText("胜场数", 0, 0)
     ctx.restore()
   }, [rFull, alpha, params.targetRank, N_VALUES, WINS_VALUES])
 
   return (
-    <div className="card-premium p-6">
+    <div className="cr-card">
       <div className="pb-3">
-        <h3 className="section-title text-gold text-base mb-1">鲁棒性热力图</h3>
-        <p className="text-xs text-slate-400">
+        <h3 className="section-title text-base mb-1">鲁棒性热力图</h3>
+        <p className="text-xs text-gray-500">
           各胜场数在不同参与人数下进入前{" "}
-          <strong className="text-slate-200">{params.targetRank.toLocaleString()}</strong> 名的概率
+          <strong className="text-gray-900">{params.targetRank.toLocaleString()}</strong> 名的概率
         </p>
       </div>
       <div className="space-y-3">
         <canvas
           ref={canvasRef}
-          className="w-full rounded-xl border border-purple-900/40"
+          className="w-full rounded-xl border-2 border-gray-200"
           style={{ maxWidth: "560px", display: "block", margin: "0 auto" }}
         />
 
         {/* 图例 */}
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
+        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
-              style={{ backgroundColor: "rgba(56,189,248,0.6)" }}
+              style={{ backgroundColor: "rgba(37,99,235,0.7)" }}
             />
             <span>安全（≥95%）</span>
           </div>
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
-              style={{ backgroundColor: "rgba(251,146,60,0.5)" }}
+              style={{ backgroundColor: "rgba(245,158,11,0.6)" }}
             />
             <span>边缘（50%~95%）</span>
           </div>
           <div className="flex items-center gap-1">
             <span
               className="inline-block w-3 h-3 rounded-sm"
-              style={{ backgroundColor: "rgba(239,68,68,0.4)" }}
+              style={{ backgroundColor: "rgba(220,38,38,0.5)" }}
             />
             <span>危险（&lt;50%）</span>
           </div>

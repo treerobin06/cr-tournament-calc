@@ -25,10 +25,10 @@ function FormulaBlock({ latex, display = true, description }: FormulaBlockProps)
     <div className="space-y-1">
       <div
         ref={ref}
-        className="overflow-x-auto py-2 px-3 bg-[#0F0F23]/50 rounded-lg text-sm"
+        className="overflow-x-auto py-2 px-3 bg-gray-50 rounded-lg text-sm"
       />
       {description && (
-        <p className="text-xs text-muted-foreground px-1">{description}</p>
+        <p className="text-xs text-gray-500 px-1">{description}</p>
       )}
     </div>
   )
@@ -36,12 +36,12 @@ function FormulaBlock({ latex, display = true, description }: FormulaBlockProps)
 
 export function MathInsights() {
   return (
-    <div className="card-premium p-6" style={{ background: 'linear-gradient(180deg, rgba(25,23,50,0.95), rgba(20,18,42,0.98))' }}>
-      <h3 className="section-title text-gold text-base mb-5">数学原理</h3>
+    <div className="cr-card">
+      <h3 className="section-title text-base mb-5">数学原理</h3>
       <div className="space-y-5">
         {/* NegBin PMF */}
         <div className="space-y-2">
-          <h4 className="text-amber-400/90 text-sm font-semibold uppercase tracking-wider">
+          <h4 className="text-amber-600 text-sm font-semibold uppercase tracking-wider">
             负二项分布 PMF
           </h4>
           <FormulaBlock
@@ -56,7 +56,7 @@ export function MathInsights() {
 
         {/* 递推公式 */}
         <div className="space-y-2">
-          <h4 className="text-amber-400/90 text-sm font-semibold uppercase tracking-wider">
+          <h4 className="text-amber-600 text-sm font-semibold uppercase tracking-wider">
             递推关系
           </h4>
           <FormulaBlock
@@ -67,7 +67,7 @@ export function MathInsights() {
 
         {/* 衰减比 */}
         <div className="space-y-2">
-          <h4 className="text-amber-400/90 text-sm font-semibold uppercase tracking-wider">
+          <h4 className="text-amber-600 text-sm font-semibold uppercase tracking-wider">
             衰减比解读
           </h4>
           <FormulaBlock
@@ -82,7 +82,7 @@ export function MathInsights() {
 
         {/* 晋级概率 */}
         <div className="space-y-2">
-          <h4 className="text-amber-400/90 text-sm font-semibold uppercase tracking-wider">
+          <h4 className="text-amber-600 text-sm font-semibold uppercase tracking-wider">
             晋级概率（二项分布近似）
           </h4>
           <FormulaBlock
@@ -97,7 +97,7 @@ export function MathInsights() {
 
         {/* 混合分布 */}
         <div className="space-y-2">
-          <h4 className="text-amber-400/90 text-sm font-semibold uppercase tracking-wider">
+          <h4 className="text-amber-600 text-sm font-semibold uppercase tracking-wider">
             混合分布（κ 插值）
           </h4>
           <FormulaBlock
