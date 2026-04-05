@@ -38,8 +38,11 @@ function App() {
             <h1 className="text-4xl font-bold section-title">
               ⚔️ 皇室战争锦标赛排名计算器
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              基于负二项分布的理论估算 · 输出为参考区间，非精确预测
+            <p className="text-sm mt-2 font-medium" style={{fontFamily: "'Poppins', sans-serif"}}>
+              <span className="inline-block bg-amber-100 text-amber-800 border border-amber-300 rounded-full px-3 py-0.5 mr-2 text-xs font-bold">理论估算</span>
+              基于负二项分布 · 输出为参考区间
+              <span className="mx-2 text-gray-300">|</span>
+              <span className="text-gray-400">非精确预测，实际排名受多种因素影响</span>
             </p>
           </div>
         </div>
