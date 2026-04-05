@@ -52,39 +52,44 @@ function App() {
 
       {/* Main Layout — 窄屏垂直堆叠，宽屏侧边栏 */}
       <div className="w-full px-4 sm:px-8 py-6 flex flex-col lg:flex-row gap-8">
-        {/* Left Sidebar: ParameterPanel */}
-        <aside className="w-full lg:w-80 shrink-0 lg:sticky lg:top-4 lg:self-start">
+        {/* Left Sidebar: ParameterPanel + 共享参数 */}
+        <aside className="w-full lg:w-80 shrink-0 lg:sticky lg:top-4 lg:self-start space-y-4">
+          {/* 核心参数（控制所有 Tab 和图表） */}
+          <div className="cr-card p-5">
+            <h2 className="text-lg font-bold mb-4" style={{fontFamily: "'Righteous', sans-serif"}}>核心参数</h2>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">参赛人数</label>
+                <input
+                  type="number"
+                  value={playerCount}
+                  min={1000}
+                  max={5000000}
+                  onChange={e => setPlayerCount(Math.max(1000, Number(e.target.value)))}
+                  className="w-full h-9 text-sm"
+                />
+                <p className="text-xs text-gray-400">{playerCount.toLocaleString()} 人参赛</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">目标排名</label>
+                <input
+                  type="number"
+                  value={targetRank}
+                  min={1}
+                  max={100000}
+                  onChange={e => setTargetRank(Math.max(1, Number(e.target.value)))}
+                  className="w-full h-9 text-sm"
+                />
+                <p className="text-xs text-gray-400">进入前 {targetRank} 名</p>
+              </div>
+            </div>
+          </div>
+          {/* 模型参数 */}
           <ParameterPanel params={params} onChange={setParams} />
         </aside>
 
         {/* Right Main Area */}
         <main className="flex-1 min-w-0 space-y-8">
-          {/* 共享参数输入栏 — 控制所有 Tab 和图表 */}
-          <div className="cr-card p-4 flex items-center gap-6 flex-wrap">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-semibold text-gray-600 whitespace-nowrap">⚙️ 参赛人数</label>
-              <input
-                type="number"
-                value={playerCount}
-                min={1000}
-                max={5000000}
-                onChange={e => setPlayerCount(Math.max(1000, Number(e.target.value)))}
-                className="w-36 h-8 text-sm border-2 border-gray-300 rounded-lg px-2 focus:border-black focus:outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-semibold text-gray-600 whitespace-nowrap">🎯 目标排名</label>
-              <input
-                type="number"
-                value={targetRank}
-                min={1}
-                max={100000}
-                onChange={e => setTargetRank(Math.max(1, Number(e.target.value)))}
-                className="w-24 h-8 text-sm border-2 border-gray-300 rounded-lg px-2 focus:border-black focus:outline-none"
-              />
-            </div>
-            <p className="text-xs text-gray-400">这两个参数同时控制下方查询和所有图表</p>
-          </div>
 
           {/* Query Tabs */}
           <section>
@@ -119,14 +124,14 @@ function App() {
             <DataTable distribution={distribution} params={params} targetRank={targetRank} />
           </section>
 
+          {/* Monte Carlo Simulation */}
+          <section>
+            <SimulationPanel params={params} playerCount={playerCount} targetRank={targetRank} />
+          </section>
+
           {/* Math Insights */}
           <section>
             <MathInsights />
-          </section>
-
-          {/* Monte Carlo Simulation */}
-          <section>
-            <SimulationPanel params={params} />
           </section>
         </main>
       </div>
