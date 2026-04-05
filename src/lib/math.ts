@@ -100,24 +100,63 @@ export function mixedTail(k: number, rFull: number, alpha: number, n: number): n
 }
 
 /**
+ * 作弊/送分修正：部分玩家通过小号送分获得额外胜场
+ * cheaterRatio: 作弊玩家占比（如 0.005 = 0.5%）
+ * cheaterBoost: 作弊者额外获得的胜场数（如 8 = 平均多赢 8 场）
+ *
+ * 建模方式：作弊者的胜场 = 正常 NegBin 胜场 + cheaterBoost
+ * 最终分布 = (1-cheaterRatio) × 正常分布 + cheaterRatio × 右移分布
+ */
+
+/**
  * 计算完整分布表
  * 返回 wins=0,1,2,... 直到尾概率足够小时停止
+ * cheaterRatio/cheaterBoost: 送分修正参数（可选）
  */
-export function computeDistribution(rFull: number, n: number, alpha: number): DistributionRow[] {
+export function computeDistribution(
+  rFull: number, n: number, alpha: number,
+  cheaterRatio: number = 0, cheaterBoost: number = 8,
+): DistributionRow[] {
   const threshold = 0.001 / n; // 停止条件：pmf 很小
-  const rows: DistributionRow[] = [];
 
-  // 滚动计算 PMF（rFull 和 rFull-1 各维护一个递推值）
-  let pmfFull = Math.pow(0.5, rFull);       // NegBin(rFull,0.5) P(k=0)
-  let pmfLower = Math.pow(0.5, rFull - 1);  // NegBin(rFull-1,0.5) P(k=0)
-
-  let tailProb = 1.0; // S(0) = 1
+  // 先计算正常分布的 PMF 数组
+  const normalPmfs: number[] = [];
+  let pmfFull = Math.pow(0.5, rFull);
+  let pmfLower = Math.pow(0.5, rFull - 1);
 
   for (let k = 0; ; k++) {
     const pmf = alpha * pmfFull + (1 - alpha) * pmfLower;
-
+    normalPmfs.push(pmf);
     if (k > 0 && pmf < threshold) break;
-    if (k > 500) break; // 安全上限
+    if (k > 500) break;
+    pmfFull = pmfFull * (k + rFull) / (2 * (k + 1));
+    pmfLower = pmfLower * (k + rFull - 1) / (2 * (k + 1));
+  }
+
+  // 合并正常分布和作弊者分布
+  // 作弊者的胜场 = 正常胜场 + cheaterBoost（右移）
+  const maxK = cheaterRatio > 0
+    ? normalPmfs.length + cheaterBoost + 10
+    : normalPmfs.length;
+  const mergedPmfs: number[] = new Array(maxK).fill(0);
+
+  for (let k = 0; k < normalPmfs.length; k++) {
+    // 正常玩家贡献
+    mergedPmfs[k] += (1 - cheaterRatio) * normalPmfs[k];
+    // 作弊者贡献（右移 cheaterBoost）
+    if (cheaterRatio > 0 && k + cheaterBoost < maxK) {
+      mergedPmfs[k + cheaterBoost] += cheaterRatio * normalPmfs[k];
+    }
+  }
+
+  // 构建分布表
+  const rows: DistributionRow[] = [];
+  let tailProb = 1.0;
+
+  for (let k = 0; k < maxK; k++) {
+    const pmf = mergedPmfs[k];
+    if (k > 0 && pmf < threshold && cheaterRatio === 0) break;
+    if (k > 0 && pmf < threshold / 10 && cheaterRatio > 0) break;
 
     rows.push({
       wins: k,
@@ -125,17 +164,11 @@ export function computeDistribution(rFull: number, n: number, alpha: number): Di
       count: pmf * n,
       tailProb,
       tailCount: tailProb * n,
-      decayRatio: k === 0 ? NaN : pmf / (rows[k - 1]?.pmf ?? 1),
+      decayRatio: k === 0 ? NaN : pmf / (rows[k - 1]?.pmf || 1),
     });
 
-    // 更新尾概率：S(k+1) = S(k) - P(k)
     tailProb = tailProb - pmf;
     if (tailProb < 0) tailProb = 0;
-
-    // 递推下一个 PMF
-    // P(k+1) = P(k) * (k + r) / (2*(k+1))
-    pmfFull = pmfFull * (k + rFull) / (2 * (k + 1));
-    pmfLower = pmfLower * (k + rFull - 1) / (2 * (k + 1));
   }
 
   return rows;

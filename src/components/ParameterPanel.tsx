@@ -15,6 +15,7 @@ export interface TournamentParams {
   fullPlayRatio: number // 默认 0.9，范围 0.5-1.0
   targetRank: number    // 默认 900
   kappa: number         // 默认 1.47，范围 0-3.0
+  cheaterRatio: number  // 默认 0.005 (0.5%)，送分玩家占比
 }
 
 export const DEFAULT_PARAMS: TournamentParams = {
@@ -23,6 +24,7 @@ export const DEFAULT_PARAMS: TournamentParams = {
   fullPlayRatio: 0.9,
   targetRank: 900,
   kappa: 1.47,
+  cheaterRatio: 0.005,
 }
 
 /**
@@ -113,6 +115,29 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             aria-label="满局率"
           />
           <p className="text-xs text-gray-400">打满所有命的玩家比例。部分玩家可能提前放弃，只打了 4 命就不打了。90% 表示大约 10% 的人提前退出。</p>
+        </div>
+
+        {/* 送分修正 */}
+        <div className="space-y-2 pt-3 border-t border-gray-200">
+          <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">
+            送分修正
+            <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
+              {params.cheaterRatio === 0 ? '关闭' : `${(params.cheaterRatio * 100).toFixed(1)}%`}
+            </span>
+          </Label>
+          <Slider
+            min={0}
+            max={30}
+            step={1}
+            value={[Math.round(params.cheaterRatio * 1000)]}
+            onValueChange={([v]) => update({ cheaterRatio: v / 1000 })}
+            aria-label="送分修正比例"
+          />
+          <p className="text-xs text-gray-400">
+            {params.cheaterRatio === 0
+              ? '不考虑送分/买分行为，使用纯理论分布。'
+              : `约 ${(params.cheaterRatio * 100).toFixed(1)}% 的玩家通过小号送分获得额外胜场，会使高胜场区间人数增多。基于去年真实数据校准，默认 0.5% 可较好拟合实际分布。`}
+          </p>
         </div>
       </div>
     </div>

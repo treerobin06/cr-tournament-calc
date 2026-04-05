@@ -26,3 +26,4 @@ dist-ssr/
 
 # TypeScript 构建信息
 *.tsbuildinfo
+.vercel
