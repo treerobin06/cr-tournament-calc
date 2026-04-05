@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy": "npm run build && scp -i ~/.ssh/dmit_rsa -r dist/* root@64.186.248.116:/var/www/html/ && npx gh-pages -d dist && npx vercel deploy dist --prod --yes --name crccjinbiaosai"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.0",
