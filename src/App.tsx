@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react"
-import { ParameterPanel, DEFAULT_PARAMS, paramsToMathArgs } from "@/components/ParameterPanel"
+import { ParameterPanel, DEFAULT_PARAMS, paramsToMathArgs, cheaterParams } from "@/components/ParameterPanel"
 import type { TournamentParams } from "@/components/ParameterPanel"
 import { QueryTabs } from "@/components/QueryTabs"
 import { DistributionChart } from "@/components/DistributionChart"
@@ -19,7 +19,8 @@ function App() {
 
   const distribution = useMemo(() => {
     const { rFull, alpha } = paramsToMathArgs(params)
-    return computeDistribution(rFull, playerCount, alpha, params.cheaterRatio, params.cheaterBoost)
+    const { cheaterRatio, cheaterBoost } = cheaterParams(params.cheaterIntensity)
+    return computeDistribution(rFull, playerCount, alpha, cheaterRatio, cheaterBoost)
   }, [params, playerCount])
 
   // 找到目标排名对应的胜场数（用于图表标注）

@@ -7,7 +7,7 @@ import {
   promotionProbability,
 } from "@/lib/math"
 import type { TournamentParams } from "@/components/ParameterPanel"
-import { paramsToMathArgs } from "@/components/ParameterPanel"
+import { paramsToMathArgs, cheaterParams } from "@/components/ParameterPanel"
 
 interface QueryTabsProps {
   params: TournamentParams
@@ -76,8 +76,7 @@ function InputField({
 
 export function QueryTabs({ params, playerCount, targetRank }: QueryTabsProps) {
   const { rFull, alpha } = paramsToMathArgs(params)
-  const cr = params.cheaterRatio
-  const cb = params.cheaterBoost
+  const { cheaterRatio: cr, cheaterBoost: cb } = cheaterParams(params.cheaterIntensity)
   const [activeTab, setActiveTab] = useState('mode1')
 
   // ========== 模式1：胜场→排名 ==========

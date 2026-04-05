@@ -15,8 +15,7 @@ export interface TournamentParams {
   fullPlayRatio: number // 默认 0.9，范围 0.5-1.0
   targetRank: number    // 默认 900
   kappa: number         // 默认 1.47，范围 0-3.0
-  cheaterRatio: number  // 默认 0.005 (0.5%)，送分玩家占比
-  cheaterBoost: number  // 默认 12，送分者额外胜场数
+  cheaterIntensity: number  // 默认 50，送分强度 0~100
 }
 
 export const DEFAULT_PARAMS: TournamentParams = {
@@ -25,8 +24,19 @@ export const DEFAULT_PARAMS: TournamentParams = {
   fullPlayRatio: 0.9,
   targetRank: 900,
   kappa: 1.47,
-  cheaterRatio: 0.0055,
-  cheaterBoost: 12,
+  cheaterIntensity: 50,
+}
+
+/**
+ * 从送分强度（0~100）映射到内部参数 cheaterRatio 和 cheaterBoost
+ * 0 = 无送分，50 = 去年平均水平（ratio=0.55%, boost=12），100 = 极端
+ */
+export function cheaterParams(intensity: number): { cheaterRatio: number; cheaterBoost: number } {
+  if (intensity <= 0) return { cheaterRatio: 0, cheaterBoost: 0 }
+  // 线性插值：intensity 0→100 映射到 ratio 0→1.5%, boost 6→20
+  const ratio = (intensity / 100) * 0.015
+  const boost = Math.round(6 + (intensity / 100) * 14)
+  return { cheaterRatio: ratio, cheaterBoost: boost }
 }
 
 /**
@@ -124,44 +134,24 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
           <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">
             送分修正
             <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
-              {params.cheaterRatio === 0 ? '关闭' : `${(params.cheaterRatio * 100).toFixed(3)}%`}
+              {params.cheaterIntensity === 0 ? '关闭' :
+               params.cheaterIntensity <= 30 ? '轻微' :
+               params.cheaterIntensity <= 70 ? '中等' : '严重'}
             </span>
           </Label>
           <Slider
             min={0}
-            max={300}
+            max={100}
             step={1}
-            value={[Math.round(params.cheaterRatio * 10000)]}
-            onValueChange={([v]) => update({ cheaterRatio: v / 10000 })}
-            aria-label="送分修正比例"
+            value={[params.cheaterIntensity]}
+            onValueChange={([v]) => update({ cheaterIntensity: v })}
+            aria-label="送分修正强度"
           />
           <p className="text-xs text-gray-400">
-            {params.cheaterRatio === 0
+            {params.cheaterIntensity === 0
               ? '不考虑送分/买分行为，使用纯理论分布。'
-              : `约 ${(params.cheaterRatio * 100).toFixed(1)}% 的玩家通过小号送分获得额外胜场。`}
+              : `强度 ${params.cheaterIntensity}%。50% 对应去年实际水平（≥20 胜人数拟合误差 <1%）。数值越高，高胜场区间人数越多。`}
           </p>
-
-          {params.cheaterRatio > 0 && (
-            <div className="space-y-1 mt-2">
-              <Label className="text-xs font-medium text-gray-500">
-                送分额外胜场
-                <span className="ml-2 text-base font-semibold text-gray-900">
-                  +{params.cheaterBoost}
-                </span>
-              </Label>
-              <Slider
-                min={4}
-                max={24}
-                step={1}
-                value={[params.cheaterBoost]}
-                onValueChange={([v]) => update({ cheaterBoost: v })}
-                aria-label="送分额外胜场"
-              />
-              <p className="text-xs text-gray-400">
-                被送分者平均多赢的场数。参考值：普通送分 ~8，极端送分 ~18。
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
