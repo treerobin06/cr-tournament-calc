@@ -154,7 +154,7 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
               {/* 冠军统计 */}
               <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-4">
                 <div className="text-xs text-gray-500 mb-1 font-medium tracking-wide">冠军胜场</div>
-                <div className="stat-number text-xl">
+                <div className="stat-number font-mono-data text-xl">
                   {result.championWins.avg.toFixed(1)}
                 </div>
                 {result.runs > 1 && (
@@ -170,7 +170,7 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
                   <div className="text-xs text-gray-500 mb-1 font-medium tracking-wide">
                     第 {params.targetRank} 名胜场
                   </div>
-                  <div className="stat-number text-xl" style={{ color: '#16A34A' }}>
+                  <div className="stat-number font-mono-data text-xl" style={{ color: '#16A34A' }}>
                     {targetRankStats.avg.toFixed(1)}
                   </div>
                   {result.runs > 1 && (

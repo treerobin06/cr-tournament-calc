@@ -119,7 +119,7 @@ export function PredictRank({ params }: PredictRankProps) {
         <div className="border-t border-gray-200 pt-4 space-y-3">
           {/* 中位排名（p50） */}
           <div className="rounded-xl bg-gray-50 border-2 border-gray-200 p-4 text-center">
-            <div className="stat-number text-3xl">
+            <div className="stat-number font-mono-data text-3xl">
               #{result.p50RankRange[0].toLocaleString()} ~ #{result.p50RankRange[1].toLocaleString()}
             </div>
             <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">预测中位排名（p50 区间）</div>
@@ -129,7 +129,7 @@ export function PredictRank({ params }: PredictRankProps) {
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-2">
               <div className="text-xs text-gray-500 mb-1">80% 置信区间</div>
-              <div className="font-extrabold text-amber-600 text-sm">
+              <div className="font-extrabold text-amber-600 text-sm font-mono-data">
                 #{result.p80RankRange[0].toLocaleString()}
                 <span className="text-gray-400 mx-1">~</span>
                 #{result.p80RankRange[1].toLocaleString()}
@@ -137,7 +137,7 @@ export function PredictRank({ params }: PredictRankProps) {
             </div>
             <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-2">
               <div className="text-xs text-gray-500 mb-1">95% 置信区间</div>
-              <div className="font-extrabold text-blue-600 text-sm">
+              <div className="font-extrabold text-blue-600 text-sm font-mono-data">
                 #{result.p95RankRange[0].toLocaleString()}
                 <span className="text-gray-400 mx-1">~</span>
                 #{result.p95RankRange[1].toLocaleString()}

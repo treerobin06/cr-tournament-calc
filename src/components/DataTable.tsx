@@ -46,7 +46,7 @@ export function DataTable({ distribution, params }: DataTableProps) {
                   {keyNodes.map(({ rank, safeWins }) => (
                     <td
                       key={rank}
-                      className={`text-center py-1.5 px-2 font-bold ${
+                      className={`text-center py-1.5 px-2 font-bold font-mono-data ${
                         rank === params.targetRank ? "text-amber-600 bg-amber-50" : "text-gray-900"
                       }`}
                     >
@@ -93,17 +93,17 @@ export function DataTable({ distribution, params }: DataTableProps) {
                           : ""
                       }`}
                     >
-                      <td className="text-right py-1 pr-3 font-medium text-gray-900">{row.wins}</td>
-                      <td className="text-right py-1 pr-3 text-gray-500">
+                      <td className="text-right py-1 pr-3 font-medium text-gray-900 font-mono-data">{row.wins}</td>
+                      <td className="text-right py-1 pr-3 text-gray-500 font-mono-data">
                         {Math.round(row.count).toLocaleString()}
                       </td>
-                      <td className={`text-right py-1 pr-3 font-medium ${isHighlighted ? "text-emerald-600" : "text-gray-700"}`}>
+                      <td className={`text-right py-1 pr-3 font-medium font-mono-data ${isHighlighted ? "text-emerald-600" : "text-gray-700"}`}>
                         {Math.round(row.tailCount).toLocaleString()}
                       </td>
-                      <td className="text-right py-1 pr-3 text-gray-500">
+                      <td className="text-right py-1 pr-3 text-gray-500 font-mono-data">
                         {(row.tailProb * 100).toFixed(2)}%
                       </td>
-                      <td className="text-right py-1 text-gray-500">
+                      <td className="text-right py-1 text-gray-500 font-mono-data">
                         {isNaN(row.decayRatio) ? "—" : `${(row.decayRatio * 100).toFixed(1)}%`}
                       </td>
                     </tr>

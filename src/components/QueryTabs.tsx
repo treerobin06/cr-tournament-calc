@@ -108,13 +108,13 @@ export function QueryTabs({ params }: QueryTabsProps) {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
-                  <div className="stat-number text-2xl">
+                  <div className="stat-number font-mono-data text-2xl">
                     #{rankResult.optimisticRank.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">乐观排名（期望）</div>
                 </div>
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
-                  <div className="stat-number text-2xl">
+                  <div className="stat-number font-mono-data text-2xl">
                     #{rankResult.conservativeRank.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">保守排名（95% 置信）</div>
@@ -132,7 +132,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
                       : 'badge-danger'
                   }
                 >
-                  {(promoProb * 100).toFixed(1)}%
+                  <span className="font-mono-data">{(promoProb * 100).toFixed(1)}%</span>
                 </span>
                 <span className="text-xs text-gray-500">
                   （进入前 {params.targetRank.toLocaleString()} 名）
@@ -183,7 +183,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
                       style={{ width: `${Math.min(probability * 100, 100)}%` }}
                     />
                   </div>
-                  <span className="w-16 text-xs text-gray-500 shrink-0">
+                  <span className="w-16 text-xs text-gray-500 shrink-0 font-mono-data">
                     {(probability * 100).toFixed(1)}%
                   </span>
                   {wins === winsToRankResult.safeWins && (
@@ -245,7 +245,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
             {sweepPoints.map(({ N, prob, safe }) => (
               <div key={N} className="grid grid-cols-3 text-sm py-0.5">
                 <span className="text-gray-700">{N.toLocaleString()}</span>
-                <span className={safe ? "text-emerald-600 font-medium" : "text-red-600 font-medium"}>
+                <span className={`font-mono-data ${safe ? "text-emerald-600 font-medium" : "text-red-600 font-medium"}`}>
                   {(prob * 100).toFixed(1)}%
                 </span>
                 <span>
@@ -281,19 +281,19 @@ export function QueryTabs({ params }: QueryTabsProps) {
               </p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
-                  <div className="stat-number text-xl">
+                  <div className="stat-number font-mono-data text-xl">
                     {safeCount.maxPlayers80.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">80% 置信</div>
                 </div>
                 <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-center">
-                  <div className="stat-number text-xl">
+                  <div className="stat-number font-mono-data text-xl">
                     {safeCount.maxPlayers.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">95% 置信</div>
                 </div>
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
-                  <div className="stat-number text-xl">
+                  <div className="stat-number font-mono-data text-xl">
                     {safeCount.maxPlayers99.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">99% 置信</div>
