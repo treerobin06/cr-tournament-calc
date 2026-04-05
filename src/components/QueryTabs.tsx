@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   queryRankFromWins,
   queryWinsToRank,
@@ -21,57 +20,106 @@ const TABS = [
   { id: 'mode4', label: '安全人数' },
 ]
 
+/**
+ * 每个 Tab 内联输入行的统一容器
+ */
+function InputRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-4 flex-wrap p-4 bg-amber-50/50 rounded-xl border border-amber-200/50 mb-4">
+      {children}
+    </div>
+  )
+}
+
+/**
+ * 带 label 的单个输入字段
+ */
+function InputField({
+  label,
+  id,
+  value,
+  min,
+  max,
+  onChange,
+  className = "w-32",
+}: {
+  label: string
+  id: string
+  value: number
+  min?: number
+  max?: number
+  onChange: (v: number) => void
+  className?: string
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <label htmlFor={id} className="text-sm font-semibold text-gray-600 whitespace-nowrap">
+        {label}
+      </label>
+      <Input
+        id={id}
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => {
+          const v = parseInt(e.target.value)
+          if (!isNaN(v)) onChange(v)
+        }}
+        className={`${className} h-8 text-sm`}
+      />
+    </div>
+  )
+}
+
 export function QueryTabs({ params }: QueryTabsProps) {
-  const { rFull, alpha, n } = paramsToMathArgs(params)
+  const { rFull, alpha } = paramsToMathArgs(params)
   const [activeTab, setActiveTab] = useState('mode1')
 
-  // 模式1：胜场→排名
-  const [wins1, setWins1] = useState(12)
-  // 模式3：鲁棒性分析
-  const [wins3, setWins3] = useState(12)
-  const [nMin, setNMin] = useState(100000)
-  const [nMax, setNMax] = useState(500000)
-  // 模式4：安全人数
-  const [wins4, setWins4] = useState(12)
+  // ========== 模式1：胜场→排名 ==========
+  const [m1PlayerCount, setM1PlayerCount] = useState(240000)
+  const [m1Wins, setM1Wins] = useState(12)
 
-  // 模式1 计算
-  const rankResult =
-    wins1 >= 0
-      ? queryRankFromWins(wins1, rFull, alpha, n)
-      : null
+  const m1n = m1PlayerCount
+  const m1RankResult = m1Wins >= 0 ? queryRankFromWins(m1Wins, rFull, alpha, m1n) : null
+  const m1PromoProb = m1Wins >= 0
+    ? promotionProbability(m1Wins, rFull, alpha, m1n, params.targetRank)
+    : 0
 
-  const promoProb =
-    wins1 >= 0
-      ? promotionProbability(wins1, rFull, alpha, n, params.targetRank)
-      : 0
+  // ========== 模式2：名次→胜场 ==========
+  const [m2PlayerCount, setM2PlayerCount] = useState(240000)
+  const [m2TargetRank, setM2TargetRank] = useState(900)
 
-  // 模式2：名次→胜场
-  const winsToRankResult = queryWinsToRank(rFull, alpha, n, params.targetRank, 0.95)
+  const m2n = m2PlayerCount
+  const m2WinsResult = queryWinsToRank(rFull, alpha, m2n, m2TargetRank, 0.95)
 
-  // 模式3：N 范围扫描（10 点）
-  const sweepPoints: Array<{
-    N: number
-    prob: number
-    safe: boolean
-  }> = (() => {
-    if (nMin >= nMax) return []
-    const step = (nMax - nMin) / 9
+  // ========== 模式3：鲁棒性分析 ==========
+  const [m3Wins, setM3Wins] = useState(12)
+  const [m3NMin, setM3NMin] = useState(100000)
+  const [m3NMax, setM3NMax] = useState(500000)
+  const [m3TargetRank, setM3TargetRank] = useState(900)
+
+  const m3SweepPoints: Array<{ N: number; prob: number; safe: boolean }> = (() => {
+    if (m3NMin >= m3NMax) return []
+    const step = (m3NMax - m3NMin) / 9
     return Array.from({ length: 10 }, (_, i) => {
-      const N = Math.round(nMin + i * step)
-      const prob = promotionProbability(wins3, rFull, alpha, N, params.targetRank)
+      const N = Math.round(m3NMin + i * step)
+      const prob = promotionProbability(m3Wins, rFull, alpha, N, m3TargetRank)
       return { N, prob, safe: prob >= 0.95 }
     })
   })()
 
-  // 模式4：安全人数
-  const safeCount =
-    wins4 >= 0
-      ? querySafePlayerCount(wins4, rFull, alpha, params.targetRank, 0.95)
-      : null
+  // ========== 模式4：安全人数 ==========
+  const [m4Wins, setM4Wins] = useState(12)
+  const [m4TargetRank, setM4TargetRank] = useState(900)
+
+  const m4SafeCount = m4Wins >= 0
+    ? querySafePlayerCount(m4Wins, rFull, alpha, m4TargetRank, 0.95)
+    : null
 
   return (
     <div className="space-y-3">
-      {/* Tab Bar — KAWE.SKI 风格按钮 */}
+      {/* Tab Bar */}
       <div className="flex gap-3 flex-wrap">
         {TABS.map(tab => (
           <button
@@ -88,34 +136,41 @@ export function QueryTabs({ params }: QueryTabsProps) {
         ))}
       </div>
 
-      {/* 模式1：给定胜场，查询期望排名 */}
+      {/* ===== 模式1：胜场→排名 ===== */}
       {activeTab === 'mode1' && (
-        <div className="cr-card space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="mode1-wins-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">胜场数</Label>
-            <Input
-              id="mode1-wins-input"
-              type="number"
+        <div className="cr-card space-y-0">
+          <InputRow>
+            <InputField
+              label="参赛人数"
+              id="m1-player-count"
+              value={m1PlayerCount}
+              min={1000}
+              max={5000000}
+              onChange={(v) => setM1PlayerCount(Math.max(1000, Math.min(5000000, v)))}
+            />
+            <InputField
+              label="我的胜场"
+              id="m1-wins"
+              value={m1Wins}
               min={0}
               max={100}
-              value={wins1}
-              onChange={(e) => setWins1(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-32 h-8"
+              onChange={(v) => setM1Wins(Math.max(0, v))}
             />
-          </div>
+          </InputRow>
 
-          {rankResult && (
-            <div className="space-y-3">
+          {/* 输出区 */}
+          {m1RankResult && (
+            <div className="space-y-3 bg-white rounded-xl p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number font-mono-data text-2xl">
-                    #{rankResult.optimisticRank.toLocaleString()}
+                    #{m1RankResult.optimisticRank.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">乐观排名（期望）</div>
                 </div>
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number font-mono-data text-2xl">
-                    #{rankResult.conservativeRank.toLocaleString()}
+                    #{m1RankResult.conservativeRank.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">保守排名（95% 置信）</div>
                 </div>
@@ -125,14 +180,14 @@ export function QueryTabs({ params }: QueryTabsProps) {
                 <span className="text-sm text-gray-500">晋级概率：</span>
                 <span
                   className={
-                    promoProb >= 0.95
+                    m1PromoProb >= 0.95
                       ? 'badge-safe'
-                      : promoProb >= 0.5
+                      : m1PromoProb >= 0.5
                       ? 'badge-gold'
                       : 'badge-danger'
                   }
                 >
-                  <span className="font-mono-data">{(promoProb * 100).toFixed(1)}%</span>
+                  <span className="font-mono-data">{(m1PromoProb * 100).toFixed(1)}%</span>
                 </span>
                 <span className="text-xs text-gray-500">
                   （进入前 {params.targetRank.toLocaleString()} 名）
@@ -141,108 +196,128 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
               <div className="text-sm text-gray-500">
                 百分位：你超过了{" "}
-                <strong className="text-gray-900">{rankResult.percentile.toFixed(1)}%</strong> 的玩家
+                <strong className="text-gray-900">{m1RankResult.percentile.toFixed(1)}%</strong> 的玩家
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* 模式2：名次→胜场，概率条 */}
+      {/* ===== 模式2：名次→胜场 ===== */}
       {activeTab === 'mode2' && (
-        <div className="cr-card space-y-4">
-          <div className="text-sm text-gray-500">
-            目标排名：<strong className="text-gray-900">前 {params.targetRank.toLocaleString()} 名</strong>
-            所需胜场分析（95% 安全胜场：
-            <strong className="text-emerald-600 ml-1">
-              {winsToRankResult.safeWins} 胜
-            </strong>
-            ）
-          </div>
+        <div className="cr-card space-y-0">
+          <InputRow>
+            <InputField
+              label="参赛人数"
+              id="m2-player-count"
+              value={m2PlayerCount}
+              min={1000}
+              max={5000000}
+              onChange={(v) => setM2PlayerCount(Math.max(1000, Math.min(5000000, v)))}
+            />
+            <InputField
+              label="目标排名"
+              id="m2-target-rank"
+              value={m2TargetRank}
+              min={1}
+              max={100000}
+              onChange={(v) => setM2TargetRank(Math.max(1, v))}
+            />
+          </InputRow>
 
-          <div className="space-y-1 max-h-64 overflow-y-auto">
-            {winsToRankResult.probByWins
-              .filter(r => r.probability > 0.001 && r.wins >= winsToRankResult.safeWins - 3)
-              .filter((_, i, arr) => i <= arr.findIndex(r => r.wins === winsToRankResult.safeWins) + 5)
-              .map(({ wins, probability }) => (
-                <div key={wins} className="flex items-center gap-2">
-                  <span className="w-16 text-xs text-right text-gray-500 shrink-0">
-                    {wins} 胜
-                  </span>
-                  <div className="flex-1 prob-bar">
-                    <div
-                      className={`prob-bar-fill ${
-                        wins === winsToRankResult.safeWins
-                          ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                          : probability >= 0.95
-                          ? "bg-gradient-to-r from-emerald-400 to-emerald-300"
-                          : probability >= 0.5
-                          ? "bg-gradient-to-r from-amber-400 to-amber-300"
-                          : "bg-gradient-to-r from-red-400 to-red-300"
-                      }`}
-                      style={{ width: `${Math.min(probability * 100, 100)}%` }}
-                    />
-                  </div>
-                  <span className="w-16 text-xs text-gray-500 shrink-0 font-mono-data">
-                    {(probability * 100).toFixed(1)}%
-                  </span>
-                  {wins === winsToRankResult.safeWins && (
-                    <span className="badge-safe text-xs shrink-0">
-                      95% 安全
+          {/* 输出区 */}
+          <div className="space-y-4 bg-white rounded-xl p-4">
+            <div className="text-sm text-gray-500">
+              目标排名：<strong className="text-gray-900">前 {m2TargetRank.toLocaleString()} 名</strong>
+              {" "}所需胜场分析（95% 安全胜场：
+              <strong className="text-emerald-600 ml-1">
+                {m2WinsResult.safeWins} 胜
+              </strong>
+              ）
+            </div>
+
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {m2WinsResult.probByWins
+                .filter(r => r.probability > 0.001 && r.wins >= m2WinsResult.safeWins - 3)
+                .filter((_, i, arr) => i <= arr.findIndex(r => r.wins === m2WinsResult.safeWins) + 5)
+                .map(({ wins, probability }) => (
+                  <div key={wins} className="flex items-center gap-2">
+                    <span className="w-16 text-xs text-right text-gray-500 shrink-0">
+                      {wins} 胜
                     </span>
-                  )}
-                </div>
-              ))}
+                    <div className="flex-1 prob-bar">
+                      <div
+                        className={`prob-bar-fill ${
+                          wins === m2WinsResult.safeWins
+                            ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                            : probability >= 0.95
+                            ? "bg-gradient-to-r from-emerald-400 to-emerald-300"
+                            : probability >= 0.5
+                            ? "bg-gradient-to-r from-amber-400 to-amber-300"
+                            : "bg-gradient-to-r from-red-400 to-red-300"
+                        }`}
+                        style={{ width: `${Math.min(probability * 100, 100)}%` }}
+                      />
+                    </div>
+                    <span className="w-16 text-xs text-gray-500 shrink-0 font-mono-data">
+                      {(probability * 100).toFixed(1)}%
+                    </span>
+                    {wins === m2WinsResult.safeWins && (
+                      <span className="badge-safe text-xs shrink-0">
+                        95% 安全
+                      </span>
+                    )}
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* 模式3：鲁棒性分析 */}
+      {/* ===== 模式3：鲁棒性分析 ===== */}
       {activeTab === 'mode3' && (
-        <div className="cr-card space-y-4">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="mode3-wins-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">胜场数</Label>
-              <Input
-                id="mode3-wins-input"
-                type="number"
-                min={0}
-                value={wins3}
-                onChange={(e) => setWins3(Math.max(0, parseInt(e.target.value) || 0))}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="mode3-n-min-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">N 最小值</Label>
-              <Input
-                id="mode3-n-min-input"
-                type="number"
-                min={1000}
-                value={nMin}
-                onChange={(e) => setNMin(Math.max(1000, parseInt(e.target.value) || 1000))}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="mode3-n-max-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">N 最大值</Label>
-              <Input
-                id="mode3-n-max-input"
-                type="number"
-                min={1000}
-                value={nMax}
-                onChange={(e) => setNMax(Math.max(nMin + 1, parseInt(e.target.value) || nMin + 1))}
-                className="h-8 text-sm"
-              />
-            </div>
-          </div>
+        <div className="cr-card space-y-0">
+          <InputRow>
+            <InputField
+              label="我的胜场"
+              id="m3-wins"
+              value={m3Wins}
+              min={0}
+              max={100}
+              onChange={(v) => setM3Wins(Math.max(0, v))}
+            />
+            <InputField
+              label="人数下限"
+              id="m3-n-min"
+              value={m3NMin}
+              min={1000}
+              onChange={(v) => setM3NMin(Math.max(1000, v))}
+            />
+            <InputField
+              label="人数上限"
+              id="m3-n-max"
+              value={m3NMax}
+              min={1000}
+              onChange={(v) => setM3NMax(Math.max(m3NMin + 1, v))}
+            />
+            <InputField
+              label="目标排名"
+              id="m3-target-rank"
+              value={m3TargetRank}
+              min={1}
+              max={100000}
+              onChange={(v) => setM3TargetRank(Math.max(1, v))}
+            />
+          </InputRow>
 
-          <div className="space-y-1">
+          {/* 输出区 */}
+          <div className="space-y-1 bg-white rounded-xl p-4">
             <div className="grid grid-cols-3 text-xs text-gray-900 font-bold pb-1 border-b-2 border-black">
               <span>参与人数</span>
               <span>晋级概率</span>
               <span>状态</span>
             </div>
-            {sweepPoints.map(({ N, prob, safe }) => (
+            {m3SweepPoints.map(({ N, prob, safe }) => (
               <div key={N} className="grid grid-cols-3 text-sm py-0.5">
                 <span className="text-gray-700">{N.toLocaleString()}</span>
                 <span className={`font-mono-data ${safe ? "text-emerald-600 font-medium" : "text-red-600 font-medium"}`}>
@@ -259,49 +334,57 @@ export function QueryTabs({ params }: QueryTabsProps) {
         </div>
       )}
 
-      {/* 模式4：安全人数上限 */}
+      {/* ===== 模式4：安全人数上限 ===== */}
       {activeTab === 'mode4' && (
-        <div className="cr-card space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="mode4-wins-input" className="text-xs font-medium tracking-wide uppercase text-gray-500">胜场数</Label>
-            <Input
-              id="mode4-wins-input"
-              type="number"
+        <div className="cr-card space-y-0">
+          <InputRow>
+            <InputField
+              label="我的胜场"
+              id="m4-wins"
+              value={m4Wins}
               min={0}
-              value={wins4}
-              onChange={(e) => setWins4(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-32 h-8"
+              max={100}
+              onChange={(v) => setM4Wins(Math.max(0, v))}
             />
-          </div>
+            <InputField
+              label="目标排名"
+              id="m4-target-rank"
+              value={m4TargetRank}
+              min={1}
+              max={100000}
+              onChange={(v) => setM4TargetRank(Math.max(1, v))}
+            />
+          </InputRow>
 
-          {safeCount && (
-            <div className="space-y-3">
+          {/* 输出区 */}
+          {m4SafeCount && (
+            <div className="space-y-3 bg-white rounded-xl p-4">
               <p className="text-sm text-gray-500">
-                {wins4} 胜能稳进前 {params.targetRank.toLocaleString()} 名的最大参与人数：
+                {m4Wins} 胜能稳进前 {m4TargetRank.toLocaleString()} 名的最大参与人数：
               </p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number font-mono-data text-xl">
-                    {safeCount.maxPlayers80.toLocaleString()}
+                    {m4SafeCount.maxPlayers80.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">80% 置信</div>
                 </div>
                 <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-center">
                   <div className="stat-number font-mono-data text-xl">
-                    {safeCount.maxPlayers.toLocaleString()}
+                    {m4SafeCount.maxPlayers.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">95% 置信</div>
                 </div>
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
                   <div className="stat-number font-mono-data text-xl">
-                    {safeCount.maxPlayers99.toLocaleString()}
+                    {m4SafeCount.maxPlayers99.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500 mt-2 font-medium tracking-wide">99% 置信</div>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                即：当参与人数不超过上述数值时，{wins4} 胜有对应置信度能进入前{" "}
-                {params.targetRank.toLocaleString()} 名
+                即：当参与人数不超过上述数值时，{m4Wins} 胜有对应置信度能进入前{" "}
+                {m4TargetRank.toLocaleString()} 名
               </p>
             </div>
           )}

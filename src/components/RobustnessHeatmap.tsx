@@ -105,7 +105,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
 
     // 绘制 X 轴标签（参与人数）
     ctx.fillStyle = "#374151"
-    ctx.font = "bold 11px 'Nunito', sans-serif"
+    ctx.font = "bold 11px 'Poppins', sans-serif"
     ctx.textAlign = "center"
     // 选取 5 个刻度显示
     const xTickIndices = [0, 5, 9, 14, 19]
@@ -127,13 +127,13 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     // X 轴标题
     ctx.textAlign = "center"
     ctx.fillStyle = "#1A1A1A"
-    ctx.font = "bold 12px 'Nunito', sans-serif"
+    ctx.font = "bold 12px 'Poppins', sans-serif"
     ctx.fillText("参与人数", MARGIN_LEFT + plotW / 2, CANVAS_H - 4)
 
     // 绘制 Y 轴标签（胜场数）
     ctx.textAlign = "right"
     ctx.fillStyle = "#374151"
-    ctx.font = "bold 11px 'Nunito', sans-serif"
+    ctx.font = "bold 11px 'Poppins', sans-serif"
     WINS_VALUES.forEach((wins, rowIdx) => {
       if (wins % 2 !== 0 && wins !== WINS_MIN && wins !== WINS_MAX) return
       const y = MARGIN_TOP + rowIdx * cellH + cellH / 2 + 4
@@ -153,7 +153,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     ctx.rotate(-Math.PI / 2)
     ctx.textAlign = "center"
     ctx.fillStyle = "#1A1A1A"
-    ctx.font = "bold 12px 'Nunito', sans-serif"
+    ctx.font = "bold 12px 'Poppins', sans-serif"
     ctx.fillText("胜场数", 0, 0)
     ctx.restore()
   }, [rFull, alpha, params.targetRank, N_VALUES, WINS_VALUES])
