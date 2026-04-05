@@ -283,14 +283,14 @@ export function QueryTabs({ params, playerCount, targetRank }: QueryTabsProps) {
               label="人数下限"
               id="m3-n-min"
               value={m3NMin}
-              min={1000}
-              onChange={(v) => setM3NMin(Math.max(1000, v))}
+              min={10}
+              onChange={(v) => setM3NMin(Math.max(10, v))}
             />
             <InputField
               label="人数上限"
               id="m3-n-max"
               value={m3NMax}
-              min={1000}
+              min={10}
               onChange={(v) => setM3NMax(Math.max(m3NMin + 1, v))}
             />
             <InputField

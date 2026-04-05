@@ -10,7 +10,7 @@ import {
 import {} from "react"
 
 export interface TournamentParams {
-  playerCount: number   // 默认 240000，范围 1000-5000000
+  playerCount: number   // 默认 240000，范围 10-5000000
   lives: number         // 默认 5，可选 3/4/5/6/7
   fullPlayRatio: number // 默认 0.9，范围 0.5-1.0
   targetRank: number    // 默认 900

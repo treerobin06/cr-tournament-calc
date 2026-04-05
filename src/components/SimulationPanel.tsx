@@ -24,6 +24,9 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
   // 模拟专属参数
   const [simKappa, setSimKappa] = useState(params.kappa)
   const [runs, setRuns] = useState(5)
+  // 送分模拟
+  const [simCheaterPct, setSimCheaterPct] = useState(0)   // 百分比，如 0.5 = 0.5%
+  const [simAltsPerCheater, setSimAltsPerCheater] = useState(2)
 
   const effectiveN = Math.min(playerCount, MAX_SIM_PLAYERS)
 
@@ -34,7 +37,9 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
     kappa: simKappa,
     seed: Date.now(),
     runs,
-  }), [effectiveN, params.lives, params.fullPlayRatio, simKappa, runs])
+    cheaterFraction: simCheaterPct / 100,
+    altsPerCheater: simCheaterPct > 0 ? simAltsPerCheater : 0,
+  }), [effectiveN, params.lives, params.fullPlayRatio, simKappa, runs, simCheaterPct, simAltsPerCheater])
 
   const handleRun = () => {
     run({ ...simConfig, seed: Date.now() })
@@ -160,6 +165,55 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
           </div>
           <p className="text-xs text-gray-400">多次模拟后取平均值，次数越多结果越稳定，但耗时更长。</p>
         </div>
+
+        {/* 送分模拟 */}
+        <div className="space-y-2 pt-3 border-t border-gray-200">
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            送分模拟
+            <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
+              {simCheaterPct === 0 ? '关闭' : `${simCheaterPct.toFixed(1)}% × ${simAltsPerCheater} 小号`}
+            </span>
+          </label>
+          <Slider
+            min={0}
+            max={200}
+            step={5}
+            value={[Math.round(simCheaterPct * 100)]}
+            onValueChange={([v]) => setSimCheaterPct(v / 100)}
+            disabled={running}
+            aria-label="送分者占比"
+          />
+          <p className="text-xs text-gray-500">
+            {simCheaterPct === 0
+              ? '不模拟送分行为。开启后模拟真实 ±1 匹配约束下的小号送分。'
+              : `${simCheaterPct.toFixed(1)}% 的玩家带小号（约 ${Math.round(effectiveN * simCheaterPct / 100)} 组，共 ${Math.round(effectiveN * simCheaterPct / 100 * simAltsPerCheater)} 个小号）`}
+          </p>
+
+          {simCheaterPct > 0 && (
+            <div className="mt-2">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">每人小号数</label>
+              <div className="flex gap-1.5 flex-wrap">
+                {[1, 2, 3, 5].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setSimAltsPerCheater(n)}
+                    disabled={running}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer
+                      ${simAltsPerCheater === n
+                        ? 'bg-red-100 text-red-800 border-2 border-red-400'
+                        : 'bg-white text-gray-600 border border-gray-300 hover:border-gray-400'
+                      } ${running ? 'opacity-50' : ''}`}
+                  >
+                    {n}个
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                大号优先匹配自己的小号（±1 胜场内），小号故意输。小号用完命就自然淘汰。
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 当前参数概览（从左侧读取） */}
@@ -217,6 +271,19 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
                   范围 {result.championWins.min}~{result.championWins.max}
                 </p>
               </div>
+
+              {/* 送分效果 */}
+              {result.cheaterBoost > 0 && (
+                <div className="p-4 bg-red-50 rounded-xl border border-red-200">
+                  <p className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-1">送分实际效果</p>
+                  <p className="text-2xl font-bold" style={{fontFamily: "'Righteous', sans-serif"}}>
+                    +{result.cheaterBoost.toFixed(1)} 胜
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    大号均值 {result.cheaterMainAvgWins.toFixed(1)} 胜 · 受 ±1 匹配约束
+                  </p>
+                </div>
+              )}
 
               {/* 目标排名胜场 */}
               {targetRankStats && (

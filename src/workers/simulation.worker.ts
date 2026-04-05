@@ -50,6 +50,9 @@ export interface SimConfig {
   kappa: number
   seed: number
   runs: number    // 模拟次数（1~50，默认 1）
+  // 送分模拟参数
+  cheaterFraction: number  // 送分者占总人数比例（0~0.02，如 0.005 = 0.5%）
+  altsPerCheater: number   // 每个送分者的小号数（0~5）
 }
 
 export interface SimResult {
@@ -65,12 +68,17 @@ export interface SimResult {
   championWins: { avg: number; min: number; max: number }
   // 目标排名统计
   targetRankWins: { avg: number; min: number; max: number }
+  // 送分统计
+  cheaterMainAvgWins: number   // 送分者大号平均胜场
+  cheaterBoost: number         // 大号均值 - 正常玩家均值
 }
 
 // ---- 单次模拟返回的原始数据 ----
 interface SingleRunResult {
   winDistribution: number[]
   topPlayerWins: number[]
+  cheaterMainAvgWins: number
+  normalPlayerAvgWins: number
 }
 
 // ---- 单次模拟逻辑 ----
@@ -103,106 +111,158 @@ function runSingleSimulation(config: SimConfig, seed: number): SingleRunResult {
     }
   }
 
+  // ---- 设置送分组 ----
+  // 玩家布局：[0, numMains) 大号 | [numMains, numMains+numAlts) 小号 | 剩余正常玩家
+  const cheaterFrac = config.cheaterFraction ?? 0
+  const altsPerMain = config.altsPerCheater ?? 0
+  const numMains = (cheaterFrac > 0 && altsPerMain > 0)
+    ? Math.min(Math.round(N * cheaterFrac), Math.floor(N / (1 + altsPerMain)))
+    : 0
+  const numAltsTotal = numMains * altsPerMain
+
+  // 每个大号的小号索引列表
+  const altsOf: number[][] = new Array(numMains)
+  for (let m = 0; m < numMains; m++) {
+    altsOf[m] = []
+    for (let a = 0; a < altsPerMain; a++) {
+      const altIdx = numMains + m * altsPerMain + a
+      if (altIdx < N) altsOf[m].push(altIdx)
+    }
+  }
+
   let activeCount = N
 
   // ---- 主循环 ----
   while (true) {
-    // 收集活跃玩家
-    const pool: number[] = []
-    for (let i = 0; i < N; i++) {
-      if (active[i]) pool.push(i)
-    }
-    if (pool.length <= 1) break
+    let anyActivity = false
 
-    // 按胜场降序排，同胜场内随机 shuffle（Fisher-Yates）
-    pool.sort((a, b) => wins[b] - wins[a])
-
-    // 对同胜场组做内部 shuffle
-    let groupStart = 0
-    while (groupStart < pool.length) {
-      let groupEnd = groupStart
-      const w = wins[pool[groupStart]]
-      while (groupEnd < pool.length && wins[pool[groupEnd]] === w) groupEnd++
-      // Fisher-Yates shuffle [groupStart, groupEnd)
-      for (let k = groupEnd - 1; k > groupStart; k--) {
-        const j = groupStart + Math.floor(rng.next() * (k - groupStart + 1))
-        const tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp
-      }
-      groupStart = groupEnd
-    }
-
-    // 线性扫描配对（胜场差 ≤ 1）
-    const pairs: Array<[number, number]> = []
-    const paired = new Uint8Array(pool.length)
-
-    for (let i = 0; i < pool.length - 1; i++) {
-      if (paired[i]) continue
-      for (let j = i + 1; j < pool.length; j++) {
-        if (paired[j]) continue
-        if (Math.abs(wins[pool[i]] - wins[pool[j]]) <= 1) {
-          pairs.push([pool[i], pool[j]])
-          paired[i] = 1
-          paired[j] = 1
-          break
+    // ---- 送分配对（大号优先匹配自己的小号） ----
+    const sniped = numMains > 0 ? new Uint8Array(N) : null
+    if (numMains > 0) {
+      for (let m = 0; m < numMains; m++) {
+        if (!active[m] || sniped![m]) continue
+        for (const a of altsOf[m]) {
+          if (!active[a] || sniped![a]) continue
+          if (Math.abs(wins[m] - wins[a]) <= 1) {
+            // 送分：大号赢，小号输
+            wins[m]++
+            losses[a]++
+            if (losses[a] >= maxLives[a]) { active[a] = 0; activeCount-- }
+            sniped![m] = 1
+            sniped![a] = 1
+            anyActivity = true
+            break  // 每轮每个大号只送一次
+          }
         }
       }
     }
 
-    // 无有效配对 → 结束
-    if (pairs.length === 0) break
+    // ---- 收集未配对的活跃玩家进行正常匹配 ----
+    const pool: number[] = []
+    for (let i = 0; i < N; i++) {
+      if (active[i] && !(sniped && sniped[i])) pool.push(i)
+    }
 
-    // 执行对局
-    for (const [a, b] of pairs) {
-      let aWins: boolean
-      if (config.kappa === 0) {
-        // 纯随机 50/50
-        aWins = rng.next() < 0.5
-      } else {
-        // Bradley-Terry 模型：P(a) = sigmoid(kappa * (skill_a - skill_b))
-        const diff = config.kappa * (skills[a] - skills[b])
-        // 防止溢出
-        const prob = diff > 20 ? 1 : diff < -20 ? 0 : 1 / (1 + Math.exp(-diff))
-        aWins = rng.next() < prob
+    if (pool.length >= 2) {
+      // 按胜场降序排，同胜场内随机 shuffle
+      pool.sort((a, b) => wins[b] - wins[a])
+
+      let groupStart = 0
+      while (groupStart < pool.length) {
+        let groupEnd = groupStart
+        const w = wins[pool[groupStart]]
+        while (groupEnd < pool.length && wins[pool[groupEnd]] === w) groupEnd++
+        for (let k = groupEnd - 1; k > groupStart; k--) {
+          const j = groupStart + Math.floor(rng.next() * (k - groupStart + 1))
+          const tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp
+        }
+        groupStart = groupEnd
       }
 
-      if (aWins) {
-        wins[a]++
-        losses[b]++
-        if (losses[b] >= maxLives[b]) { active[b] = 0; activeCount-- }
-      } else {
-        wins[b]++
-        losses[a]++
-        if (losses[a] >= maxLives[a]) { active[a] = 0; activeCount-- }
+      // 线性扫描配对（胜场差 ≤ 1）
+      const pairs: Array<[number, number]> = []
+      const paired = new Uint8Array(pool.length)
+
+      for (let i = 0; i < pool.length - 1; i++) {
+        if (paired[i]) continue
+        for (let j = i + 1; j < pool.length; j++) {
+          if (paired[j]) continue
+          if (Math.abs(wins[pool[i]] - wins[pool[j]]) <= 1) {
+            pairs.push([pool[i], pool[j]])
+            paired[i] = 1
+            paired[j] = 1
+            break
+          }
+        }
+      }
+
+      if (pairs.length > 0) {
+        anyActivity = true
+        for (const [a, b] of pairs) {
+          let aWins: boolean
+          if (config.kappa === 0) {
+            aWins = rng.next() < 0.5
+          } else {
+            const diff = config.kappa * (skills[a] - skills[b])
+            const prob = diff > 20 ? 1 : diff < -20 ? 0 : 1 / (1 + Math.exp(-diff))
+            aWins = rng.next() < prob
+          }
+
+          if (aWins) {
+            wins[a]++
+            losses[b]++
+            if (losses[b] >= maxLives[b]) { active[b] = 0; activeCount-- }
+          } else {
+            wins[b]++
+            losses[a]++
+            if (losses[a] >= maxLives[a]) { active[a] = 0; activeCount-- }
+          }
+        }
       }
     }
 
-    // 发送进度（由外层调用者处理整体进度汇报）
+    if (!anyActivity) break
+
     const progress = 1 - activeCount / N
     self.postMessage({ type: 'progress-inner', progress })
   }
 
   // ---- 计算结果 ----
-  // 所有玩家按 (wins DESC, losses ASC) 排序
   const allPlayers = Array.from({ length: N }, (_, i) => i)
   allPlayers.sort((a, b) => {
     if (wins[b] !== wins[a]) return wins[b] - wins[a]
     return losses[a] - losses[b]
   })
 
-  // 胜场分布
   let maxWinsVal = 0
   for (let i = 0; i < N; i++) if (wins[i] > maxWinsVal) maxWinsVal = wins[i]
   const winDistribution = new Array<number>(maxWinsVal + 1).fill(0)
   for (let i = 0; i < N; i++) winDistribution[wins[i]]++
 
-  // 前 1000 名的胜场
   const topCount = Math.min(1000, N)
   const topPlayerWins: number[] = []
   for (let i = 0; i < topCount; i++) {
     topPlayerWins.push(wins[allPlayers[i]])
   }
 
-  return { winDistribution, topPlayerWins }
+  // 送分统计：大号平均胜场 vs 正常玩家平均胜场
+  let cheaterMainAvgWins = 0
+  let normalPlayerAvgWins = 0
+  if (numMains > 0) {
+    let totalMainWins = 0
+    for (let m = 0; m < numMains; m++) totalMainWins += wins[m]
+    cheaterMainAvgWins = totalMainWins / numMains
+
+    let totalNormalWins = 0
+    let normalCount = 0
+    for (let i = numMains + numAltsTotal; i < N; i++) {
+      totalNormalWins += wins[i]
+      normalCount++
+    }
+    normalPlayerAvgWins = normalCount > 0 ? totalNormalWins / normalCount : 0
+  }
+
+  return { winDistribution, topPlayerWins, cheaterMainAvgWins, normalPlayerAvgWins }
 }
 
 // ---- 多次模拟汇总 ----
@@ -277,6 +337,21 @@ function runMultiSimulation(config: SimConfig): void {
     max: 0,
   }
 
+  // 送分统计汇总
+  let cheaterMainAvgWins = 0
+  let cheaterBoost = 0
+  if ((config.cheaterFraction ?? 0) > 0 && (config.altsPerCheater ?? 0) > 0) {
+    let totalMainWins = 0
+    let totalNormalWins = 0
+    for (const res of allResults) {
+      totalMainWins += res.cheaterMainAvgWins
+      totalNormalWins += res.normalPlayerAvgWins
+    }
+    cheaterMainAvgWins = Math.round((totalMainWins / totalRuns) * 10) / 10
+    const normalAvg = totalNormalWins / totalRuns
+    cheaterBoost = Math.round((cheaterMainAvgWins - normalAvg) * 10) / 10
+  }
+
   const elapsed = performance.now() - t0
 
   self.postMessage({
@@ -290,6 +365,8 @@ function runMultiSimulation(config: SimConfig): void {
       maxTopPlayerWins,
       championWins: championStats,
       targetRankWins: targetRankStats,
+      cheaterMainAvgWins,
+      cheaterBoost,
     } satisfies SimResult,
   })
 }

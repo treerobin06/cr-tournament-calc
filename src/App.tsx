@@ -64,9 +64,9 @@ function App() {
                 <input
                   type="number"
                   value={playerCount}
-                  min={1000}
+                  min={10}
                   max={5000000}
-                  onChange={e => setPlayerCount(Math.max(1000, Number(e.target.value)))}
+                  onChange={e => setPlayerCount(Math.max(10, Number(e.target.value)))}
                   className="w-full h-9 text-sm"
                 />
                 <p className="text-xs text-gray-400">{playerCount.toLocaleString()} 人参赛</p>
