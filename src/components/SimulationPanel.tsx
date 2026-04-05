@@ -1,7 +1,7 @@
 /**
- * SimulationPanel — 蒙特卡罗模拟控制面板
+ * SimulationPanel — 蒙特卡罗模拟控制面板（自包含版本）
  * 显示运行/取消按钮、进度条、模拟结果
- * 支持多次模拟并展示汇总统计
+ * 所有参数均内联管理，无需依赖侧边栏
  */
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
@@ -18,28 +18,46 @@ const MAX_SIM_PLAYERS = 500_000
 /** 可选的模拟次数 */
 const RUN_OPTIONS = [1, 5, 10, 20, 50]
 
+/** 满局率选项 */
+const ALPHA_OPTIONS = [0.7, 0.8, 0.9, 0.95, 1.0]
+
+/** 命数选项 */
+const LIVES_OPTIONS = [3, 4, 5, 6, 7]
+
+/** 通用 select/input 样式 */
+const INPUT_CLASS = 'h-9 px-3 rounded-lg border border-gray-300 bg-white text-sm w-full focus:outline-none focus:ring-2 focus:ring-amber-300'
+
 export function SimulationPanel({ params }: SimulationPanelProps) {
   const { run, cancel, running, progress, result } = useSimulation()
-  const [runs, setRuns] = useState(1)
 
-  // 构建发给 Worker 的配置（playerCount 上限 50 万）
+  // ── 内联参数（从 props 初始化，之后独立） ──────────────────────────
+  const [simPlayerCount, setSimPlayerCount] = useState(
+    Math.min(params.playerCount, MAX_SIM_PLAYERS)
+  )
+  const [simLives, setSimLives] = useState(params.lives)
+  const [simAlpha, setSimAlpha] = useState(params.fullPlayRatio)
+  const [simKappa, setSimKappa] = useState(params.kappa)
+  const [runs, setRuns] = useState(1)
+  const [simTargetRank, setSimTargetRank] = useState(params.targetRank ?? 900)
+
+  // ── 构建发给 Worker 的配置 ────────────────────────────────────────
   const simConfig = useMemo(() => ({
-    playerCount: Math.min(params.playerCount, MAX_SIM_PLAYERS),
-    lives: params.lives,
-    fullPlayRatio: params.fullPlayRatio,
-    kappa: params.kappa,
+    playerCount: Math.min(simPlayerCount, MAX_SIM_PLAYERS),
+    lives: simLives,
+    fullPlayRatio: simAlpha,
+    kappa: simKappa,
     seed: Date.now(),
     runs,
-  }), [params, runs])  // eslint-disable-line react-hooks/exhaustive-deps
+  }), [simPlayerCount, simLives, simAlpha, simKappa, runs])
 
   const handleRun = () => {
     run({ ...simConfig, seed: Date.now() })
   }
 
-  // 找到目标排名对应的胜场统计（从多次模拟结果中提取）
+  // ── 目标排名对应的胜场统计 ────────────────────────────────────────
   const targetRankStats = useMemo(() => {
     if (!result) return undefined
-    const idx = params.targetRank - 1
+    const idx = simTargetRank - 1
     if (idx >= 0 && idx < result.avgTopPlayerWins.length) {
       return {
         avg: result.avgTopPlayerWins[idx],
@@ -48,7 +66,14 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
       }
     }
     return undefined
-  }, [result, params.targetRank])
+  }, [result, simTargetRank])
+
+  // κ 含义说明
+  const kappaLabel = useMemo(() => {
+    if (simKappa === 0) return '无差异（纯运气）'
+    const winRate = Math.round(100 / (1 + Math.exp(-2 * simKappa)))
+    return `顶尖 vs 普通 ≈ ${winRate}% 胜率`
+  }, [simKappa])
 
   // 进度百分比
   const pct = Math.round(progress * 100)
@@ -59,34 +84,124 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
         <h3 className="section-title text-base mb-0">蒙特卡罗模拟</h3>
         <span className="badge-gold text-xs">实验性</span>
       </div>
-      <p className="text-sm text-gray-500 mb-3 leading-relaxed">
+      <p className="text-sm text-gray-500 mb-4 leading-relaxed">
         蒙特卡罗模拟通过在电脑上模拟整场比赛（每对玩家逐场对战），验证理论计算的准确性。
         当开启「玩家实力差异」（κ &gt; 0）时，理论公式不再适用，必须通过模拟获得结果。
         <span className="text-gray-400">
           模拟次数越多，结果越稳定。推荐至少 5 次以获得可靠的平均值。
         </span>
       </p>
+
+      {/* ── 内联参数网格 ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        {/* 参赛人数 */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500">参赛人数</label>
+          <input
+            type="number"
+            value={simPlayerCount}
+            min={2}
+            max={MAX_SIM_PLAYERS}
+            step={10000}
+            onChange={e => setSimPlayerCount(Number(e.target.value))}
+            disabled={running}
+            className={`${INPUT_CLASS} mt-1 ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+          />
+        </div>
+
+        {/* 命数 */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500">命数</label>
+          <select
+            value={simLives}
+            onChange={e => setSimLives(Number(e.target.value))}
+            disabled={running}
+            className={`${INPUT_CLASS} mt-1 ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {LIVES_OPTIONS.map(v => (
+              <option key={v} value={v}>{v} 命</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 满局率 */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500">满局率</label>
+          <select
+            value={simAlpha}
+            onChange={e => setSimAlpha(Number(e.target.value))}
+            disabled={running}
+            className={`${INPUT_CLASS} mt-1 ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {ALPHA_OPTIONS.map(v => (
+              <option key={v} value={v}>{Math.round(v * 100)}%</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 玩家实力差异 κ */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500">玩家实力差异 κ</label>
+          <input
+            type="number"
+            value={simKappa}
+            step={0.1}
+            min={0}
+            max={3}
+            onChange={e => setSimKappa(Number(e.target.value))}
+            disabled={running}
+            className={`${INPUT_CLASS} mt-1 ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+          />
+          <p className="text-xs text-gray-400 mt-0.5">{kappaLabel}</p>
+        </div>
+
+        {/* 模拟次数 */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500">模拟次数</label>
+          <div className="flex gap-1 mt-1 flex-wrap">
+            {RUN_OPTIONS.map(n => (
+              <button
+                key={n}
+                onClick={() => setRuns(n)}
+                disabled={running}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer
+                  ${runs === n
+                    ? 'bg-amber-100 text-amber-800 border-2 border-amber-400'
+                    : 'bg-white text-gray-600 border border-gray-300 hover:border-gray-400 hover:text-gray-800'
+                  }
+                  ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 目标排名 */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500">目标排名</label>
+          <input
+            type="number"
+            value={simTargetRank}
+            min={1}
+            step={100}
+            onChange={e => setSimTargetRank(Number(e.target.value))}
+            disabled={running}
+            className={`${INPUT_CLASS} mt-1 ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+          />
+          <p className="text-xs text-gray-400 mt-0.5">第 N 名需要多少胜</p>
+        </div>
+      </div>
+
       <div className="space-y-4">
-        {/* kappa 模式说明 */}
-        {params.kappa === 0 ? (
-          <p className="text-xs text-gray-500">
-            当前 κ=0（纯随机对局），模拟结果可直接对比理论值验证模型正确性。
-          </p>
-        ) : (
-          <p className="text-xs text-gray-500">
-            当前 κ={params.kappa.toFixed(2)}（Bradley-Terry 技能模型），技能服从 N(0,1)。
-            结果仅供参考，与理论模型存在差异属于正常现象。
-          </p>
-        )}
-
         {/* 人数超限提示 */}
-        {params.playerCount > MAX_SIM_PLAYERS && (
+        {simPlayerCount > MAX_SIM_PLAYERS && (
           <p className="text-xs text-amber-600">
-            注意：模拟人数已限制为 {MAX_SIM_PLAYERS.toLocaleString()}（实际参数为 {params.playerCount.toLocaleString()}）。
+            注意：模拟人数已限制为 {MAX_SIM_PLAYERS.toLocaleString()}（当前输入 {simPlayerCount.toLocaleString()}）。
           </p>
         )}
 
-        {/* 模拟次数选择 + 操作按钮 */}
+        {/* 运行按钮 + 参数概览 */}
         <div className="flex items-center gap-3 flex-wrap">
           {running ? (
             <Button variant="destructive" size="sm" onClick={cancel} className="cursor-pointer">
@@ -101,31 +216,9 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
             </button>
           )}
 
-          {/* 模拟次数选择器 */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">模拟次数：</span>
-            <div className="flex gap-1">
-              {RUN_OPTIONS.map(n => (
-                <button
-                  key={n}
-                  onClick={() => setRuns(n)}
-                  disabled={running}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer
-                    ${runs === n
-                      ? 'bg-amber-100 text-amber-800 border-2 border-amber-400'
-                      : 'bg-gray-100 text-gray-600 border border-gray-300 hover:border-gray-400 hover:text-gray-800'
-                    }
-                    ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <span className="text-xs text-gray-500">
-            {Math.min(params.playerCount, MAX_SIM_PLAYERS).toLocaleString()} 人 ·{' '}
-            {params.lives} 命 · 满局率 {(params.fullPlayRatio * 100).toFixed(0)}%
+            {Math.min(simPlayerCount, MAX_SIM_PLAYERS).toLocaleString()} 人 ·{' '}
+            {simLives} 命 · 满局率 {Math.round(simAlpha * 100)}% · κ={simKappa.toFixed(2)}
           </span>
         </div>
 
@@ -175,7 +268,7 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
               {targetRankStats && (
                 <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4">
                   <div className="text-xs text-gray-500 mb-1 font-medium tracking-wide">
-                    第 {params.targetRank} 名胜场
+                    第 {simTargetRank} 名胜场
                   </div>
                   <div className="stat-number font-mono-data text-xl" style={{ color: '#16A34A' }}>
                     {targetRankStats.avg.toFixed(1)}
@@ -211,7 +304,7 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
             {/* 胜场分布 */}
             <div>
               <p className="text-xs text-gray-500 mb-2">
-                {result.runs > 1 ? '平均' : ''}胜场分布（{Math.min(params.playerCount, MAX_SIM_PLAYERS).toLocaleString()} 人）：
+                {result.runs > 1 ? '平均' : ''}胜场分布（{Math.min(simPlayerCount, MAX_SIM_PLAYERS).toLocaleString()} 人）：
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {result.avgWinDistribution.map((count, w) => (
