@@ -11,6 +11,8 @@ import { paramsToMathArgs } from "@/components/ParameterPanel"
 
 interface QueryTabsProps {
   params: TournamentParams
+  playerCount: number
+  targetRank: number
 }
 
 const TABS = [
@@ -72,26 +74,20 @@ function InputField({
   )
 }
 
-export function QueryTabs({ params }: QueryTabsProps) {
+export function QueryTabs({ params, playerCount, targetRank }: QueryTabsProps) {
   const { rFull, alpha } = paramsToMathArgs(params)
   const [activeTab, setActiveTab] = useState('mode1')
 
   // ========== 模式1：胜场→排名 ==========
-  const [m1PlayerCount, setM1PlayerCount] = useState(240000)
   const [m1Wins, setM1Wins] = useState(12)
 
-  const m1n = m1PlayerCount
-  const m1RankResult = m1Wins >= 0 ? queryRankFromWins(m1Wins, rFull, alpha, m1n) : null
+  const m1RankResult = m1Wins >= 0 ? queryRankFromWins(m1Wins, rFull, alpha, playerCount) : null
   const m1PromoProb = m1Wins >= 0
-    ? promotionProbability(m1Wins, rFull, alpha, m1n, params.targetRank)
+    ? promotionProbability(m1Wins, rFull, alpha, playerCount, targetRank)
     : 0
 
   // ========== 模式2：名次→胜场 ==========
-  const [m2PlayerCount, setM2PlayerCount] = useState(240000)
-  const [m2TargetRank, setM2TargetRank] = useState(900)
-
-  const m2n = m2PlayerCount
-  const m2WinsResult = queryWinsToRank(rFull, alpha, m2n, m2TargetRank, 0.95)
+  const m2WinsResult = queryWinsToRank(rFull, alpha, playerCount, targetRank, 0.95)
 
   // ========== 模式3：鲁棒性分析 ==========
   const [m3Wins, setM3Wins] = useState(12)
@@ -111,10 +107,9 @@ export function QueryTabs({ params }: QueryTabsProps) {
 
   // ========== 模式4：安全人数 ==========
   const [m4Wins, setM4Wins] = useState(12)
-  const [m4TargetRank, setM4TargetRank] = useState(900)
 
   const m4SafeCount = m4Wins >= 0
-    ? querySafePlayerCount(m4Wins, rFull, alpha, m4TargetRank, 0.95)
+    ? querySafePlayerCount(m4Wins, rFull, alpha, targetRank, 0.95)
     : null
 
   return (
@@ -148,14 +143,6 @@ export function QueryTabs({ params }: QueryTabsProps) {
             </span>
           </div>
           <InputRow>
-            <InputField
-              label="参赛人数"
-              id="m1-player-count"
-              value={m1PlayerCount}
-              min={1000}
-              max={5000000}
-              onChange={(v) => setM1PlayerCount(Math.max(1000, Math.min(5000000, v)))}
-            />
             <InputField
               label="我的胜场"
               id="m1-wins"
@@ -198,7 +185,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
                   <span className="font-mono-data">{(m1PromoProb * 100).toFixed(1)}%</span>
                 </span>
                 <span className="text-xs text-gray-500">
-                  （进入前 {params.targetRank.toLocaleString()} 名）
+                  （进入前 {targetRank.toLocaleString()} 名）
                 </span>
               </div>
 
@@ -222,29 +209,10 @@ export function QueryTabs({ params }: QueryTabsProps) {
               概率越高越安全，建议以 95% 为目标。
             </span>
           </div>
-          <InputRow>
-            <InputField
-              label="参赛人数"
-              id="m2-player-count"
-              value={m2PlayerCount}
-              min={1000}
-              max={5000000}
-              onChange={(v) => setM2PlayerCount(Math.max(1000, Math.min(5000000, v)))}
-            />
-            <InputField
-              label="目标排名"
-              id="m2-target-rank"
-              value={m2TargetRank}
-              min={1}
-              max={100000}
-              onChange={(v) => setM2TargetRank(Math.max(1, v))}
-            />
-          </InputRow>
-
           {/* 输出区 */}
           <div className="space-y-4 bg-white rounded-xl p-4">
             <div className="text-sm text-gray-500">
-              目标排名：<strong className="text-gray-900">前 {m2TargetRank.toLocaleString()} 名</strong>
+              目标排名：<strong className="text-gray-900">前 {targetRank.toLocaleString()} 名</strong>
               {" "}所需胜场分析（95% 安全胜场：
               <strong className="text-emerald-600 ml-1">
                 {m2WinsResult.safeWins} 胜
@@ -378,21 +346,13 @@ export function QueryTabs({ params }: QueryTabsProps) {
               max={100}
               onChange={(v) => setM4Wins(Math.max(0, v))}
             />
-            <InputField
-              label="目标排名"
-              id="m4-target-rank"
-              value={m4TargetRank}
-              min={1}
-              max={100000}
-              onChange={(v) => setM4TargetRank(Math.max(1, v))}
-            />
           </InputRow>
 
           {/* 输出区 */}
           {m4SafeCount && (
             <div className="space-y-3 bg-white rounded-xl p-4">
               <p className="text-sm text-gray-500">
-                {m4Wins} 胜能稳进前 {m4TargetRank.toLocaleString()} 名的最大参与人数：
+                {m4Wins} 胜能稳进前 {targetRank.toLocaleString()} 名的最大参与人数：
               </p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 text-center">
@@ -416,7 +376,7 @@ export function QueryTabs({ params }: QueryTabsProps) {
               </div>
               <p className="text-xs text-gray-500">
                 即：当参与人数不超过上述数值时，{m4Wins} 胜有对应置信度能进入前{" "}
-                {m4TargetRank.toLocaleString()} 名
+                {targetRank.toLocaleString()} 名
               </p>
             </div>
           )}

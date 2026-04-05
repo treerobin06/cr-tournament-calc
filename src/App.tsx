@@ -14,17 +14,19 @@ import { computeDistribution } from "@/lib/math"
 
 function App() {
   const [params, setParams] = useState<TournamentParams>(DEFAULT_PARAMS)
+  const [playerCount, setPlayerCount] = useState(240000)
+  const [targetRank, setTargetRank] = useState(900)
 
   const distribution = useMemo(() => {
-    const { rFull, alpha, n } = paramsToMathArgs(params)
-    return computeDistribution(rFull, n, alpha)
-  }, [params])
+    const { rFull, alpha } = paramsToMathArgs(params)
+    return computeDistribution(rFull, playerCount, alpha)
+  }, [params, playerCount])
 
   // 找到目标排名对应的胜场数（用于图表标注）
   const targetWins = useMemo(() => {
-    const row = distribution.find((r) => r.tailCount <= params.targetRank)
+    const row = distribution.find((r) => r.tailCount <= targetRank)
     return row?.wins
-  }, [distribution, params.targetRank])
+  }, [distribution, targetRank])
 
   return (
     <div className="min-h-screen overflow-x-hidden">
@@ -51,15 +53,42 @@ function App() {
       {/* Main Layout — 窄屏垂直堆叠，宽屏侧边栏 */}
       <div className="w-full px-4 sm:px-8 py-6 flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar: ParameterPanel */}
-        <aside className="w-full lg:w-80 shrink-0">
+        <aside className="w-full lg:w-80 shrink-0 lg:sticky lg:top-4 lg:self-start">
           <ParameterPanel params={params} onChange={setParams} />
         </aside>
 
         {/* Right Main Area */}
         <main className="flex-1 min-w-0 space-y-8">
-          {/* Query Tabs — 每个 Tab 自带独立输入 */}
+          {/* 共享参数输入栏 — 控制所有 Tab 和图表 */}
+          <div className="cr-card p-4 flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-semibold text-gray-600 whitespace-nowrap">⚙️ 参赛人数</label>
+              <input
+                type="number"
+                value={playerCount}
+                min={1000}
+                max={5000000}
+                onChange={e => setPlayerCount(Math.max(1000, Number(e.target.value)))}
+                className="w-36 h-8 text-sm border-2 border-gray-300 rounded-lg px-2 focus:border-black focus:outline-none"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-semibold text-gray-600 whitespace-nowrap">🎯 目标排名</label>
+              <input
+                type="number"
+                value={targetRank}
+                min={1}
+                max={100000}
+                onChange={e => setTargetRank(Math.max(1, Number(e.target.value)))}
+                className="w-24 h-8 text-sm border-2 border-gray-300 rounded-lg px-2 focus:border-black focus:outline-none"
+              />
+            </div>
+            <p className="text-xs text-gray-400">这两个参数同时控制下方查询和所有图表</p>
+          </div>
+
+          {/* Query Tabs */}
           <section>
-            <QueryTabs params={params} />
+            <QueryTabs params={params} playerCount={playerCount} targetRank={targetRank} />
           </section>
 
           {/* 预测最终排名 */}
@@ -73,7 +102,7 @@ function App() {
               <DistributionChart distribution={distribution} targetWins={targetWins} />
             </div>
             <div className="cr-card">
-              <CumulativeRankChart distribution={distribution} targetRank={params.targetRank} />
+              <CumulativeRankChart distribution={distribution} targetRank={targetRank} />
             </div>
           </section>
 
@@ -82,12 +111,12 @@ function App() {
             <div className="cr-card">
               <DecayRatioChart distribution={distribution} />
             </div>
-            <RobustnessHeatmap params={params} />
+            <RobustnessHeatmap params={params} targetRank={targetRank} />
           </section>
 
           {/* Data Table */}
           <section>
-            <DataTable distribution={distribution} params={params} />
+            <DataTable distribution={distribution} params={params} targetRank={targetRank} />
           </section>
 
           {/* Math Insights */}

@@ -6,11 +6,12 @@ import { paramsToMathArgs } from "@/components/ParameterPanel"
 interface DataTableProps {
   distribution: DistributionRow[]
   params: TournamentParams
+  targetRank: number
 }
 
 const KEY_RANKS = [100, 500, 900, 1000, 5000, 10000]
 
-export function DataTable({ distribution, params }: DataTableProps) {
+export function DataTable({ distribution, params, targetRank }: DataTableProps) {
   const { rFull, alpha, n } = paramsToMathArgs(params)
 
   // 关键节点：每个目标名次对应的最低胜场
@@ -20,7 +21,7 @@ export function DataTable({ distribution, params }: DataTableProps) {
   })
 
   // 找到 targetRank 对应 tailCount 的分布行索引
-  const targetRankIdx = distribution.findIndex((row) => row.tailCount <= params.targetRank)
+  const targetRankIdx = distribution.findIndex((row) => row.tailCount <= targetRank)
 
   return (
     <div className="space-y-6">
@@ -50,7 +51,7 @@ export function DataTable({ distribution, params }: DataTableProps) {
                     <td
                       key={rank}
                       className={`text-center py-1.5 px-2 font-bold font-mono-data ${
-                        rank === params.targetRank ? "text-amber-600 bg-amber-50" : "text-gray-900"
+                        rank === targetRank ? "text-amber-600 bg-amber-50" : "text-gray-900"
                       }`}
                     >
                       {safeWins} 胜
@@ -119,7 +120,7 @@ export function DataTable({ distribution, params }: DataTableProps) {
             </table>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            绿色高亮行：累计人数 ≤ 目标排名（{params.targetRank.toLocaleString()}），即该胜场可晋级
+            绿色高亮行：累计人数 ≤ 目标排名（{targetRank.toLocaleString()}），即该胜场可晋级
           </p>
         </div>
       </div>

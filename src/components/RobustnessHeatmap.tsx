@@ -5,6 +5,7 @@ import { paramsToMathArgs } from "@/components/ParameterPanel"
 
 interface RobustnessHeatmapProps {
   params: TournamentParams
+  targetRank: number
 }
 
 // 颜色插值：亮色主题下 amber-to-blue 渐变
@@ -39,7 +40,7 @@ function logSteps(min: number, max: number, steps: number): number[] {
   })
 }
 
-export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
+export function RobustnessHeatmap({ params, targetRank }: RobustnessHeatmapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { rFull, alpha } = paramsToMathArgs(params)
 
@@ -91,7 +92,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     // 绘制热力图格子
     WINS_VALUES.forEach((wins, rowIdx) => {
       N_VALUES.forEach((n, colIdx) => {
-        const prob = promotionProbability(wins, rFull, alpha, n, params.targetRank)
+        const prob = promotionProbability(wins, rFull, alpha, n, targetRank)
         const [r, g, b, a] = probToColor(prob)
         ctx.fillStyle = `rgba(${r},${g},${b},${a})`
         ctx.fillRect(
@@ -156,7 +157,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     ctx.font = "bold 12px 'Poppins', sans-serif"
     ctx.fillText("胜场数", 0, 0)
     ctx.restore()
-  }, [rFull, alpha, params.targetRank, N_VALUES, WINS_VALUES])
+  }, [rFull, alpha, targetRank, N_VALUES, WINS_VALUES])
 
   return (
     <div className="cr-card">
@@ -167,7 +168,7 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
         </p>
         <p className="text-xs text-gray-500 mt-1">
           各胜场数在不同参与人数下进入前{" "}
-          <strong className="text-gray-900">{params.targetRank.toLocaleString()}</strong> 名的概率
+          <strong className="text-gray-900">{targetRank.toLocaleString()}</strong> 名的概率
         </p>
       </div>
       <div className="space-y-3">
