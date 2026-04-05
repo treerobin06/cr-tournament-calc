@@ -1,10 +1,11 @@
 /**
  * SimulationPanel — 蒙特卡罗模拟控制面板
  * 参赛人数/命数/满局率/目标排名 从左侧共享参数读取
- * 仅 κ（实力差异）和模拟次数是模拟专属参数
+ * κ（实力差异）和模拟次数是模拟专属参数，直接在此面板配置
  */
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
+import { Slider } from '@/components/ui/slider'
 import { useSimulation } from '@/hooks/useSimulation'
 import type { TournamentParams } from '@/components/ParameterPanel'
 
@@ -53,12 +54,47 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
     return undefined
   }, [result, targetRank])
 
-  // κ 含义
-  const kappaLabel = useMemo(() => {
+  // κ 描述文字
+  const kappaDesc = useMemo(() => {
     if (simKappa === 0) return '无差异（纯运气）'
-    const winRate = Math.round(100 / (1 + Math.exp(-2 * simKappa)))
-    return `顶尖 vs 普通 ≈ ${winRate}% 胜率`
+    if (simKappa < 0.5) return '微弱'
+    if (simKappa < 1.0) return '中等'
+    if (simKappa < 2.0) return '显著'
+    return '极大'
   }, [simKappa])
+
+  // 胜率计算
+  const topVsAvgWinRate = useMemo(() => {
+    if (simKappa === 0) return 50
+    return Math.round(100 / (1 + Math.exp(-2 * simKappa)))
+  }, [simKappa])
+
+  // 抽取关键排名的数据
+  const keyRankData = useMemo(() => {
+    if (!result) return []
+    const ranks = [1, 5, 10, 20, 50, 100, 200, 500, targetRank].filter(
+      (r, i, arr) => r <= result.avgTopPlayerWins.length && arr.indexOf(r) === i
+    ).sort((a, b) => a - b)
+
+    return ranks.map(rank => {
+      const idx = rank - 1
+      return {
+        rank,
+        avg: result.avgTopPlayerWins[idx],
+        min: result.minTopPlayerWins[idx],
+        max: result.maxTopPlayerWins[idx],
+        isTarget: rank === targetRank,
+      }
+    })
+  }, [result, targetRank])
+
+  // 胜场分布（模拟结果）
+  const winDistData = useMemo(() => {
+    if (!result) return []
+    return result.avgWinDistribution
+      .map((count, wins) => ({ wins, count }))
+      .filter(d => d.count > 0)
+  }, [result])
 
   const pct = Math.round(progress * 100)
 
@@ -72,28 +108,41 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
         通过模拟整场比赛验证理论计算。当 κ &gt; 0（有实力差异）时，理论公式不适用，必须通过模拟获得结果。
       </p>
 
-      {/* 模拟专属参数 */}
-      <div className="flex items-center gap-6 flex-wrap mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+      {/* 模拟参数区 */}
+      <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-5">
         {/* 玩家实力差异 κ */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-gray-500">玩家实力差异 κ</label>
-          <input
-            type="number"
-            value={simKappa}
-            step={0.1}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            玩家实力差异 κ
+            <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
+              {kappaDesc}
+            </span>
+          </label>
+          <Slider
             min={0}
-            max={3}
-            onChange={e => setSimKappa(Number(e.target.value))}
+            max={300}
+            step={1}
+            value={[Math.round(simKappa * 100)]}
+            onValueChange={([v]) => setSimKappa(v / 100)}
             disabled={running}
-            className={`h-9 w-24 px-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 ${running ? 'opacity-50' : ''}`}
+            aria-label="玩家实力差异（κ）"
           />
-          <p className="text-xs text-gray-400">{kappaLabel}</p>
+          <p className="text-xs text-gray-500">
+            κ = {simKappa.toFixed(2)}。
+            {simKappa > 0
+              ? `顶尖玩家(+2σ) vs 普通玩家胜率 ≈ ${topVsAvgWinRate}%`
+              : '所有人胜率均为 50%，纯靠运气'}
+          </p>
+          <p className="text-xs text-gray-400">
+            控制玩家之间的实力差异程度。κ=0 表示所有人实力相同（纯靠运气），κ 越大表示高手和菜鸟差距越大。
+            仅影响蒙特卡罗模拟，理论计算始终假设 50% 胜率。
+          </p>
         </div>
 
         {/* 模拟次数 */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-gray-500">模拟次数</label>
-          <div className="flex gap-1 flex-wrap">
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">模拟次数</label>
+          <div className="flex gap-1.5 flex-wrap">
             {RUN_OPTIONS.map(n => (
               <button
                 key={n}
@@ -109,6 +158,7 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
               </button>
             ))}
           </div>
+          <p className="text-xs text-gray-400">多次模拟后取平均值，次数越多结果越稳定，但耗时更长。</p>
         </div>
       </div>
 
@@ -150,43 +200,120 @@ export function SimulationPanel({ params, playerCount, targetRank }: SimulationP
 
         {/* 结果展示 */}
         {result && !running && (
-          <div className="space-y-4 pt-2">
+          <div className="space-y-6 pt-2">
             <p className="text-xs text-gray-400">
-              耗时 {(result.elapsed / 1000).toFixed(1)}s · {runs} 次模拟
+              耗时 {(result.elapsed / 1000).toFixed(1)}s · {runs} 次模拟 · {effectiveN.toLocaleString()} 人
             </p>
 
-            {/* 冠军胜场 */}
-            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">冠军平均胜场</p>
-              <p className="text-2xl font-bold" style={{fontFamily: "'Righteous', sans-serif"}}>
-                {result.championWins.avg.toFixed(1)} 胜
-                <span className="text-sm font-normal text-gray-500 ml-2">
-                  （{result.championWins.min}~{result.championWins.max}）
-                </span>
-              </p>
-            </div>
-
-            {/* 目标排名胜场 */}
-            {targetRankStats && (
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">
-                  第 {targetRank} 名平均胜场
-                </p>
+            {/* 核心指标卡片 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* 冠军胜场 */}
+              <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">冠军平均胜场</p>
                 <p className="text-2xl font-bold" style={{fontFamily: "'Righteous', sans-serif"}}>
-                  {targetRankStats.avg.toFixed(1)} 胜
-                  <span className="text-sm font-normal text-gray-500 ml-2">
-                    （{targetRankStats.min}~{targetRankStats.max}）
-                  </span>
+                  {result.championWins.avg.toFixed(1)} 胜
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  范围 {result.championWins.min}~{result.championWins.max}
                 </p>
               </div>
-            )}
 
-            {/* 前10名 */}
+              {/* 目标排名胜场 */}
+              {targetRankStats && (
+                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">
+                    第 {targetRank} 名平均胜场
+                  </p>
+                  <p className="text-2xl font-bold" style={{fontFamily: "'Righteous', sans-serif"}}>
+                    {targetRankStats.avg.toFixed(1)} 胜
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    范围 {targetRankStats.min}~{targetRankStats.max}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 关键排名数据表 */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-2">前 10 名平均胜场</p>
+              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">关键排名胜场一览</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-gray-200">
+                      <th className="text-left py-2 px-3 text-xs font-semibold text-gray-500">排名</th>
+                      <th className="text-right py-2 px-3 text-xs font-semibold text-gray-500">平均胜场</th>
+                      <th className="text-right py-2 px-3 text-xs font-semibold text-gray-500">最少</th>
+                      <th className="text-right py-2 px-3 text-xs font-semibold text-gray-500">最多</th>
+                      <th className="text-right py-2 px-3 text-xs font-semibold text-gray-500">波动</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {keyRankData.map(d => (
+                      <tr
+                        key={d.rank}
+                        className={`border-b border-gray-100 ${d.isTarget ? 'bg-blue-50 font-semibold' : 'hover:bg-gray-50'}`}
+                      >
+                        <td className="py-1.5 px-3">
+                          #{d.rank.toLocaleString()}
+                          {d.isTarget && <span className="ml-1 text-xs text-blue-600">← 目标</span>}
+                        </td>
+                        <td className="text-right py-1.5 px-3">{d.avg.toFixed(1)}</td>
+                        <td className="text-right py-1.5 px-3 text-gray-400">{d.min}</td>
+                        <td className="text-right py-1.5 px-3 text-gray-400">{d.max}</td>
+                        <td className="text-right py-1.5 px-3 text-gray-400">±{((d.max - d.min) / 2).toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 胜场分布（模拟结果） */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">胜场人数分布（模拟）</p>
+              <div className="overflow-x-auto">
+                <div className="flex gap-1 items-end min-h-[80px]">
+                  {winDistData.map(d => {
+                    const maxCount = Math.max(...winDistData.map(x => x.count))
+                    const height = maxCount > 0 ? Math.max(2, (d.count / maxCount) * 80) : 2
+                    return (
+                      <div key={d.wins} className="flex flex-col items-center min-w-[24px]" title={`${d.wins} 胜: ${d.count.toLocaleString()} 人`}>
+                        <div
+                          className="w-4 bg-amber-400 rounded-t"
+                          style={{ height: `${height}px` }}
+                        />
+                        <span className="text-[10px] text-gray-400 mt-1">{d.wins}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1 text-center">胜场数 →</p>
+              </div>
+              {/* 分布明细表 */}
+              <details className="mt-2">
+                <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600">展开详细数据</summary>
+                <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1 text-xs">
+                  {winDistData.map(d => (
+                    <div key={d.wins} className="flex justify-between bg-gray-50 rounded px-2 py-1">
+                      <span className="text-gray-500">{d.wins}胜</span>
+                      <span className="font-medium">{d.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
+
+            {/* 前20名详细 */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">前 20 名胜场</p>
               <div className="flex gap-2 flex-wrap">
-                {result.avgTopPlayerWins.slice(0, 10).map((w: number, i: number) => (
-                  <span key={i} className="badge-gold text-xs">
+                {result.avgTopPlayerWins.slice(0, 20).map((w: number, i: number) => (
+                  <span key={i} className={`text-xs px-2 py-1 rounded-full border font-medium ${
+                    i < 3
+                      ? 'badge-gold'
+                      : 'bg-gray-50 text-gray-600 border-gray-200'
+                  }`}>
                     #{i + 1}: {w.toFixed(1)}
                   </span>
                 ))}

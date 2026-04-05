@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useState } from "react"
+import {} from "react"
 
 export interface TournamentParams {
   playerCount: number   // 默认 240000，范围 1000-5000000
@@ -67,8 +67,6 @@ interface ParameterPanelProps {
 }
 
 export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false)
-
   const update = (partial: Partial<TournamentParams>) => {
     onChange({ ...params, ...partial })
   }
@@ -115,47 +113,6 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             aria-label="满局率"
           />
           <p className="text-xs text-gray-400">打满所有命的玩家比例。部分玩家可能提前放弃，只打了 4 命就不打了。90% 表示大约 10% 的人提前退出。</p>
-        </div>
-
-        {/* 高级选项 */}
-        <div className="border-t border-gray-200 pt-4">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            <span>{showAdvanced ? "▾" : "▸"}</span>
-            高级选项
-          </button>
-          {showAdvanced && (
-            <div className="mt-3 space-y-3">
-              <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">
-                玩家实力差异
-                <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
-                  {params.kappa === 0 ? '无差异（纯运气）' :
-                   params.kappa < 0.5 ? '微弱' :
-                   params.kappa < 1.0 ? '中等' :
-                   params.kappa < 2.0 ? '显著' : '极大'}
-                </span>
-              </Label>
-              <Slider
-                min={0}
-                max={300}
-                step={1}
-                value={[Math.round(params.kappa * 100)]}
-                onValueChange={([v]) => update({ kappa: v / 100 })}
-                aria-label="玩家实力差异（κ）"
-              />
-              <p className="text-xs text-gray-500">
-                κ = {params.kappa.toFixed(2)}。
-                {params.kappa > 0 && `顶尖玩家(+2σ) vs 普通玩家胜率 ≈ ${Math.round(100 / (1 + Math.exp(-2 * params.kappa)))}%`}
-                {params.kappa === 0 && '所有人胜率均为 50%，纯靠运气'}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                控制玩家之间的实力差异程度。κ=0 表示所有人实力相同（纯靠运气），κ 越大表示高手和菜鸟差距越大。
-                此参数仅影响蒙特卡罗模拟结果，理论计算始终假设 50% 胜率。
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
