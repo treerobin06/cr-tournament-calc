@@ -44,6 +44,13 @@ export function PredictRank({ params }: PredictRankProps) {
         <span className="section-title text-lg">预测最终排名</span>
       </summary>
       <div className="pt-4 space-y-4">
+        <div className="text-sm text-gray-500 mb-4 leading-relaxed">
+          输入你当前的胜负战绩，预测你最终的排名区间。
+          <span className="text-gray-400">
+            例如你现在 15 胜 0 负，还有 5 条命，系统会计算你后续可能赢的场数，给出最终排名的中位数和置信区间。
+            你可以调整「个人胜率」滑块来模拟不同实力水平的预测结果。
+          </span>
+        </div>
         {/* 输入区域 */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">

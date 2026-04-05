@@ -56,7 +56,12 @@ export function CumulativeRankChart({ distribution, targetRank }: CumulativeRank
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="section-title text-base">累计排名曲线（对数刻度）</span>
+        <div>
+          <span className="section-title text-base">累计排名曲线（对数刻度）</span>
+          <p className="text-xs text-gray-400 mt-1">
+            纵轴为「≥ 该胜场的累计人数」，即你的排名。红色虚线为目标名次，曲线与虚线的交点就是所需胜场。
+          </p>
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={380}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>

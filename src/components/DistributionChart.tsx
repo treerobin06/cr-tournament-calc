@@ -61,7 +61,12 @@ export function DistributionChart({ distribution, targetWins }: DistributionChar
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="section-title text-base">胜场分布</span>
+        <div>
+          <span className="section-title text-base">胜场分布</span>
+          <p className="text-xs text-gray-400 mt-1">
+            展示各胜场数的玩家人数分布。柱子越高表示该胜场的人越多。曲线呈先上升后下降的钟形。
+          </p>
+        </div>
         <Button
           variant="outline"
           size="sm"

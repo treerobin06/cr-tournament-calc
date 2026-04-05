@@ -27,6 +27,9 @@ export function DataTable({ distribution, params }: DataTableProps) {
       {/* 关键节点表 */}
       <div className="cr-card">
         <h3 className="section-title text-base mb-4">关键排名节点（95% 置信胜场数）</h3>
+        <p className="text-xs text-gray-400 mb-2">
+          各目标名次对应的 95% 安全胜场数。即在该胜场下有 95% 以上概率进入对应名次。
+        </p>
         <div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -63,6 +66,9 @@ export function DataTable({ distribution, params }: DataTableProps) {
       {/* 完整分布表 */}
       <div className="cr-card">
         <h3 className="section-title text-base mb-4">完整分布表</h3>
+        <p className="text-xs text-gray-400 mb-2">
+          完整的胜场分布表。绿色高亮行表示该胜场的累计人数 ≤ 目标名次，即可以晋级。
+        </p>
         <div>
           <div className="overflow-auto max-h-80">
             <table className="w-full text-xs">

@@ -38,6 +38,10 @@ export function MathInsights() {
   return (
     <div className="cr-card">
       <h3 className="section-title text-base mb-5">数学原理</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        以下是计算器背后的核心数学原理。每位玩家的胜场数服从负二项分布——
+        直觉上，它描述了「在输满 r 场之前能赢几场」的概率。
+      </p>
       <div className="space-y-5">
         {/* NegBin PMF */}
         <div className="space-y-2">

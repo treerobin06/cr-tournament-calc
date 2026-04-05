@@ -59,6 +59,13 @@ export function SimulationPanel({ params }: SimulationPanelProps) {
         <h3 className="section-title text-base mb-0">蒙特卡罗模拟</h3>
         <span className="badge-gold text-xs">实验性</span>
       </div>
+      <p className="text-sm text-gray-500 mb-3 leading-relaxed">
+        蒙特卡罗模拟通过在电脑上模拟整场比赛（每对玩家逐场对战），验证理论计算的准确性。
+        当开启「玩家实力差异」（κ &gt; 0）时，理论公式不再适用，必须通过模拟获得结果。
+        <span className="text-gray-400">
+          模拟次数越多，结果越稳定。推荐至少 5 次以获得可靠的平均值。
+        </span>
+      </p>
       <div className="space-y-4">
         {/* kappa 模式说明 */}
         {params.kappa === 0 ? (

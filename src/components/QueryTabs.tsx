@@ -139,6 +139,14 @@ export function QueryTabs({ params }: QueryTabsProps) {
       {/* ===== 模式1：胜场→排名 ===== */}
       {activeTab === 'mode1' && (
         <div className="cr-card space-y-0">
+          <div className="text-sm text-gray-500 mb-3 leading-relaxed">
+            输入你的参赛人数和当前胜场数，计算你在所有玩家中的预估排名。
+            <br/>
+            <span className="text-gray-400">
+              「乐观排名」假设你在同胜场玩家中负场最少；「保守排名」假设你负场最多（已打满所有命）。
+              晋级概率基于二项分布计算，考虑了随机波动。
+            </span>
+          </div>
           <InputRow>
             <InputField
               label="参赛人数"
@@ -206,6 +214,14 @@ export function QueryTabs({ params }: QueryTabsProps) {
       {/* ===== 模式2：名次→胜场 ===== */}
       {activeTab === 'mode2' && (
         <div className="cr-card space-y-0">
+          <div className="text-sm text-gray-500 mb-3 leading-relaxed">
+            输入参赛人数和目标名次，计算你至少需要多少胜场才能大概率晋级。
+            <br/>
+            <span className="text-gray-400">
+              下方显示各胜场数的晋级概率。标记「95% 安全」的胜场意味着在 95% 的情况下你都能进入目标名次。
+              概率越高越安全，建议以 95% 为目标。
+            </span>
+          </div>
           <InputRow>
             <InputField
               label="参赛人数"
@@ -277,6 +293,14 @@ export function QueryTabs({ params }: QueryTabsProps) {
       {/* ===== 模式3：鲁棒性分析 ===== */}
       {activeTab === 'mode3' && (
         <div className="cr-card space-y-0">
+          <div className="text-sm text-gray-500 mb-3 leading-relaxed">
+            不确定有多少人参赛？输入你的胜场和预估人数范围，查看在不同参赛规模下你是否安全晋级。
+            <br/>
+            <span className="text-gray-400">
+              绿色「安全」表示晋级概率 ≥ 95%，红色「危险」表示不足 50%。
+              如果整个范围都是安全的，说明你的胜场足够稳。
+            </span>
+          </div>
           <InputRow>
             <InputField
               label="我的胜场"
@@ -337,6 +361,14 @@ export function QueryTabs({ params }: QueryTabsProps) {
       {/* ===== 模式4：安全人数上限 ===== */}
       {activeTab === 'mode4' && (
         <div className="cr-card space-y-0">
+          <div className="text-sm text-gray-500 mb-3 leading-relaxed">
+            输入你的胜场和目标名次，计算最多可以有多少人参赛你仍然安全晋级。
+            <br/>
+            <span className="text-gray-400">
+              例如「95% 安全上限 = 350,000 人」意味着只要参赛人数不超过 35 万，你就有 95% 以上的概率进入目标名次。
+              同时提供 80% 和 99% 的参考值。
+            </span>
+          </div>
           <InputRow>
             <InputField
               label="我的胜场"

@@ -95,6 +95,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-gray-400 mt-1">每位玩家最多可以输的场数。输满即淘汰出局。皇室战争锦标赛通常为 5 命。</p>
         </div>
 
         {/* 满局率 */}
@@ -113,9 +114,7 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
             onValueChange={([v]) => update({ fullPlayRatio: v / 100 })}
             aria-label="满局率"
           />
-          <p className="text-xs text-gray-500">
-            真正打完比赛的玩家比例
-          </p>
+          <p className="text-xs text-gray-400">打满所有命的玩家比例。部分玩家可能提前放弃，只打了 4 命就不打了。90% 表示大约 10% 的人提前退出。</p>
         </div>
 
         {/* 高级选项 */}
@@ -151,8 +150,9 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
                 {params.kappa > 0 && `顶尖玩家(+2σ) vs 普通玩家胜率 ≈ ${Math.round(100 / (1 + Math.exp(-2 * params.kappa)))}%`}
                 {params.kappa === 0 && '所有人胜率均为 50%，纯靠运气'}
               </p>
-              <p className="text-xs text-gray-400">
-                此参数仅在蒙特卡罗模拟中生效。理论计算始终假设 50% 胜率。
+              <p className="text-xs text-gray-400 mt-1">
+                控制玩家之间的实力差异程度。κ=0 表示所有人实力相同（纯靠运气），κ 越大表示高手和菜鸟差距越大。
+                此参数仅影响蒙特卡罗模拟结果，理论计算始终假设 50% 胜率。
               </p>
             </div>
           )}

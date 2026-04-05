@@ -57,7 +57,12 @@ export function DecayRatioChart({ distribution }: DecayRatioChartProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="section-title text-base">衰减比 P(k)/P(k-1)</span>
+        <div>
+          <span className="section-title text-base">衰减比 P(k)/P(k-1)</span>
+          <p className="text-xs text-gray-400 mt-1">
+            每多赢一场，剩余玩家数量缩减的比例。趋近 50% 意味着高胜场区间每多赢一场人数减半。
+          </p>
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={380}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>

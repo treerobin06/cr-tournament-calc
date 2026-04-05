@@ -162,7 +162,10 @@ export function RobustnessHeatmap({ params }: RobustnessHeatmapProps) {
     <div className="cr-card">
       <div className="pb-3">
         <h3 className="section-title text-base mb-1">鲁棒性热力图</h3>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-400 mt-1">
+          横轴为参赛人数，纵轴为胜场数，颜色表示进入目标名次的概率。蓝色=安全，橙色=危险。
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
           各胜场数在不同参与人数下进入前{" "}
           <strong className="text-gray-900">{params.targetRank.toLocaleString()}</strong> 名的概率
         </p>
