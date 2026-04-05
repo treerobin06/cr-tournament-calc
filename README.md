@@ -6,8 +6,7 @@
 
 ## 在线体验
 
-- **主站**：http://64.186.248.116:8080
-- **Vercel 镜像**：https://crccjinbiaosai.vercel.app
+- **Vercel**：https://crccjinbiaosai.vercel.app
 - **GitHub Pages**：https://treerobin06.github.io/cr-tournament-calc/
 
 ## 功能一览
