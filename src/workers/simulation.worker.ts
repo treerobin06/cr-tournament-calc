@@ -136,22 +136,42 @@ function runSingleSimulation(config: SimConfig, seed: number): SingleRunResult {
   while (true) {
     let anyActivity = false
 
-    // ---- 送分配对（大号优先匹配自己的小号） ----
+    // ---- 送分配对（组内叠罗汉：小号可以喂小号，逐级把人推上去） ----
+    // 每组按胜场降序贪心配对：高位优先被低位喂
+    // 例：大号(15)、小号A(13)、小号B(12)、小号C(11)
+    //   → B 喂 A（A→14），C 喂不了大号但 C 在正常对局里打
+    //   → 下一轮 A(14) 喂大号(15)，链条完成
     const sniped = numMains > 0 ? new Uint8Array(N) : null
     if (numMains > 0) {
       for (let m = 0; m < numMains; m++) {
-        if (!active[m] || sniped![m]) continue
+        // 收集该组所有活跃成员（大号 + 所有小号）
+        const group: number[] = []
+        if (active[m]) group.push(m)
         for (const a of altsOf[m]) {
-          if (!active[a] || sniped![a]) continue
-          if (Math.abs(wins[m] - wins[a]) <= 1) {
-            // 送分：大号赢，小号输
-            wins[m]++
-            losses[a]++
-            if (losses[a] >= maxLives[a]) { active[a] = 0; activeCount-- }
-            sniped![m] = 1
-            sniped![a] = 1
-            anyActivity = true
-            break  // 每轮每个大号只送一次
+          if (active[a]) group.push(a)
+        }
+        if (group.length < 2) continue
+
+        // 按胜场降序排列
+        group.sort((x, y) => wins[y] - wins[x])
+
+        // 贪心：高位成员优先找低位成员喂（差距 ≤ 1 才能匹配）
+        for (let i = 0; i < group.length; i++) {
+          if (sniped![group[i]]) continue
+          for (let j = i + 1; j < group.length; j++) {
+            if (sniped![group[j]]) continue
+            if (wins[group[i]] - wins[group[j]] <= 1) {
+              // group[j] 喂 group[i]：高位赢，低位输
+              const receiver = group[i]
+              const feeder = group[j]
+              wins[receiver]++
+              losses[feeder]++
+              if (losses[feeder] >= maxLives[feeder]) { active[feeder] = 0; activeCount-- }
+              sniped![receiver] = 1
+              sniped![feeder] = 1
+              anyActivity = true
+              break
+            }
           }
         }
       }
