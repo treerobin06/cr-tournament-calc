@@ -76,18 +76,20 @@ function InputField({
 
 export function QueryTabs({ params, playerCount, targetRank }: QueryTabsProps) {
   const { rFull, alpha } = paramsToMathArgs(params)
+  const cr = params.cheaterRatio
+  const cb = params.cheaterBoost
   const [activeTab, setActiveTab] = useState('mode1')
 
   // ========== 模式1：胜场→排名 ==========
   const [m1Wins, setM1Wins] = useState(12)
 
-  const m1RankResult = m1Wins >= 0 ? queryRankFromWins(m1Wins, rFull, alpha, playerCount) : null
+  const m1RankResult = m1Wins >= 0 ? queryRankFromWins(m1Wins, rFull, alpha, playerCount, cr, cb) : null
   const m1PromoProb = m1Wins >= 0
-    ? promotionProbability(m1Wins, rFull, alpha, playerCount, targetRank)
+    ? promotionProbability(m1Wins, rFull, alpha, playerCount, targetRank, cr, cb)
     : 0
 
   // ========== 模式2：名次→胜场 ==========
-  const m2WinsResult = queryWinsToRank(rFull, alpha, playerCount, targetRank, 0.95)
+  const m2WinsResult = queryWinsToRank(rFull, alpha, playerCount, targetRank, 0.95, cr, cb)
 
   // ========== 模式3：鲁棒性分析 ==========
   const [m3Wins, setM3Wins] = useState(12)
@@ -100,7 +102,7 @@ export function QueryTabs({ params, playerCount, targetRank }: QueryTabsProps) {
     const step = (m3NMax - m3NMin) / 9
     return Array.from({ length: 10 }, (_, i) => {
       const N = Math.round(m3NMin + i * step)
-      const prob = promotionProbability(m3Wins, rFull, alpha, N, m3TargetRank)
+      const prob = promotionProbability(m3Wins, rFull, alpha, N, m3TargetRank, cr, cb)
       return { N, prob, safe: prob >= 0.95 }
     })
   })()
@@ -109,7 +111,7 @@ export function QueryTabs({ params, playerCount, targetRank }: QueryTabsProps) {
   const [m4Wins, setM4Wins] = useState(12)
 
   const m4SafeCount = m4Wins >= 0
-    ? querySafePlayerCount(m4Wins, rFull, alpha, targetRank, 0.95)
+    ? querySafePlayerCount(m4Wins, rFull, alpha, targetRank, 0.95, cr, cb)
     : null
 
   return (

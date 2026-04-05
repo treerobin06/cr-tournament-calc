@@ -93,10 +93,30 @@ export function mixedPmf(k: number, rFull: number, alpha: number): number {
 }
 
 /**
- * 混合尾分布
+ * 混合尾分布（不含送分修正）
  */
 export function mixedTail(k: number, rFull: number, alpha: number, n: number): number {
   return alpha * negbinTail(k, rFull, n) + (1 - alpha) * negbinTail(k, rFull - 1, n);
+}
+
+/**
+ * 含送分修正的尾分布
+ * 最终分布 = (1-cheaterRatio) × 正常分布 + cheaterRatio × 右移分布
+ */
+export function correctedTail(
+  k: number, rFull: number, alpha: number, n: number,
+  cheaterRatio: number = 0, cheaterBoost: number = 12,
+): number {
+  if (cheaterRatio <= 0) return mixedTail(k, rFull, alpha, n);
+
+  // 正常部分的尾分布
+  const normalTail = mixedTail(k, rFull, alpha, n);
+
+  // 送分部分的尾分布 = P(正常胜场 + boost >= k) = P(正常胜场 >= k - boost)
+  const cheaterK = Math.max(0, k - cheaterBoost);
+  const cheaterTail = mixedTail(cheaterK, rFull, alpha, n);
+
+  return (1 - cheaterRatio) * normalTail + cheaterRatio * cheaterTail;
 }
 
 /**
@@ -228,14 +248,11 @@ export function promotionProbability(
   rFull: number,
   alpha: number,
   n: number,
-  targetRank: number
+  targetRank: number,
+  cheaterRatio: number = 0,
+  cheaterBoost: number = 12,
 ): number {
-  // S_mixed(k+1) 是比 k 胜排名更靠前的人（赢了超过 k 场）的比例
-  // 即 P(W > k) = S_mixed(k+1)
-  const pAbove = mixedTail(k + 1, rFull, alpha, n);
-
-  // X_k = 排在 k 胜之前的人数 ~ Binomial(N, pAbove)
-  // 晋级条件：X_k <= targetRank - 1
+  const pAbove = correctedTail(k + 1, rFull, alpha, n, cheaterRatio, cheaterBoost);
   return binomialCdfNormal(targetRank - 1, n, pAbove);
 }
 
@@ -247,24 +264,19 @@ export function queryRankFromWins(
   wins: number,
   rFull: number,
   alpha: number,
-  n: number
+  n: number,
+  cheaterRatio: number = 0,
+  cheaterBoost: number = 12,
 ): { conservativeRank: number; optimisticRank: number; percentile: number } {
-  // 比 wins 胜更靠前的人数期望 = n * P(W > wins)
-  const pAbove = mixedTail(wins + 1, rFull, alpha, n);
+  const pAbove = correctedTail(wins + 1, rFull, alpha, n, cheaterRatio, cheaterBoost);
   const expectedAbove = n * pAbove;
-
-  // 乐观排名：期望超过你的人数（取整）+ 1
   const optimisticRank = Math.floor(expectedAbove) + 1;
 
-  // 保守排名：95th percentile of Binomial(n, pAbove)
-  // 即有 95% 概率排在这个名次以内
-  // 用正态近似：mu + 1.645 * sigma + 0.5（连续性修正）
   const mu = n * pAbove;
   const sigma = Math.sqrt(n * pAbove * (1 - pAbove));
   const conservativeRank = Math.ceil(mu + 1.645 * sigma + 0.5) + 1;
 
-  // 百分位：你超过了多少比例的玩家
-  const pBelow = 1 - mixedTail(wins, rFull, alpha, n);
+  const pBelow = 1 - correctedTail(wins, rFull, alpha, n, cheaterRatio, cheaterBoost);
   const percentile = pBelow * 100;
 
   return { conservativeRank, optimisticRank, percentile };
@@ -280,13 +292,15 @@ export function queryWinsToRank(
   alpha: number,
   n: number,
   targetRank: number,
-  confidence: number = 0.95
+  confidence: number = 0.95,
+  cheaterRatio: number = 0,
+  cheaterBoost: number = 12,
 ): { safeWins: number; probByWins: Array<{ wins: number; probability: number }> } {
   const probByWins: Array<{ wins: number; probability: number }> = [];
   let safeWins = 0;
 
   for (let k = 0; k <= 200; k++) {
-    const prob = promotionProbability(k, rFull, alpha, n, targetRank);
+    const prob = promotionProbability(k, rFull, alpha, n, targetRank, cheaterRatio, cheaterBoost);
     probByWins.push({ wins: k, probability: prob });
 
     if (prob >= confidence && safeWins === 0) {
@@ -310,27 +324,23 @@ export function querySafePlayerCount(
   rFull: number,
   alpha: number,
   targetRank: number,
-  confidence: number = 0.95
+  confidence: number = 0.95,
+  cheaterRatio: number = 0,
+  cheaterBoost: number = 12,
 ): { maxPlayers: number; maxPlayers80: number; maxPlayers99: number } {
-  // 对给定胜场数 wins 和目标排名 targetRank，
-  // 找最大的 N 使得 promotionProbability(wins, rFull, alpha, N, targetRank) >= confidence
-
   function findMaxN(conf: number): number {
-    // 先检查 N=1 是否满足
-    if (promotionProbability(wins, rFull, alpha, 1, targetRank) < conf) return 0;
+    if (promotionProbability(wins, rFull, alpha, 1, targetRank, cheaterRatio, cheaterBoost) < conf) return 0;
 
-    // 指数增长找上界
     let lo = 1;
     let hi = 1;
-    while (promotionProbability(wins, rFull, alpha, hi, targetRank) >= conf) {
+    while (promotionProbability(wins, rFull, alpha, hi, targetRank, cheaterRatio, cheaterBoost) >= conf) {
       hi *= 2;
-      if (hi > 1e9) return Math.floor(hi / 2); // 防止无限循环
+      if (hi > 1e9) return Math.floor(hi / 2);
     }
 
-    // 二分搜索
     while (lo < hi - 1) {
       const mid = Math.floor((lo + hi) / 2);
-      if (promotionProbability(wins, rFull, alpha, mid, targetRank) >= conf) {
+      if (promotionProbability(wins, rFull, alpha, mid, targetRank, cheaterRatio, cheaterBoost) >= conf) {
         lo = mid;
       } else {
         hi = mid;

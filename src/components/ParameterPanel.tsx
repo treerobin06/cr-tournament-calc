@@ -25,7 +25,7 @@ export const DEFAULT_PARAMS: TournamentParams = {
   fullPlayRatio: 0.9,
   targetRank: 900,
   kappa: 1.47,
-  cheaterRatio: 0.005,
+  cheaterRatio: 0.0055,
   cheaterBoost: 12,
 }
 
@@ -124,15 +124,15 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
           <Label className="text-xs font-medium tracking-wide uppercase text-gray-500">
             送分修正
             <span className="ml-2 text-base font-semibold text-gray-900 normal-case tracking-normal">
-              {params.cheaterRatio === 0 ? '关闭' : `${(params.cheaterRatio * 100).toFixed(1)}%`}
+              {params.cheaterRatio === 0 ? '关闭' : `${(params.cheaterRatio * 100).toFixed(3)}%`}
             </span>
           </Label>
           <Slider
             min={0}
-            max={30}
+            max={300}
             step={1}
-            value={[Math.round(params.cheaterRatio * 1000)]}
-            onValueChange={([v]) => update({ cheaterRatio: v / 1000 })}
+            value={[Math.round(params.cheaterRatio * 10000)]}
+            onValueChange={([v]) => update({ cheaterRatio: v / 10000 })}
             aria-label="送分修正比例"
           />
           <p className="text-xs text-gray-400">
