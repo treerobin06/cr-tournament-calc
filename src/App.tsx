@@ -29,7 +29,7 @@ function App() {
   }, [distribution, targetRank])
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen">
       {/* 金色装饰条 */}
       <div className="gold-bar" />
 
