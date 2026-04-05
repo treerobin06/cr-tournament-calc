@@ -16,6 +16,7 @@ export interface TournamentParams {
   targetRank: number    // 默认 900
   kappa: number         // 默认 1.47，范围 0-3.0
   cheaterRatio: number  // 默认 0.005 (0.5%)，送分玩家占比
+  cheaterBoost: number  // 默认 12，送分者额外胜场数
 }
 
 export const DEFAULT_PARAMS: TournamentParams = {
@@ -25,6 +26,7 @@ export const DEFAULT_PARAMS: TournamentParams = {
   targetRank: 900,
   kappa: 1.47,
   cheaterRatio: 0.005,
+  cheaterBoost: 12,
 }
 
 /**
@@ -136,8 +138,30 @@ export function ParameterPanel({ params, onChange }: ParameterPanelProps) {
           <p className="text-xs text-gray-400">
             {params.cheaterRatio === 0
               ? '不考虑送分/买分行为，使用纯理论分布。'
-              : `约 ${(params.cheaterRatio * 100).toFixed(1)}% 的玩家通过小号送分获得额外胜场，会使高胜场区间人数增多。基于去年真实数据校准，默认 0.5% 可较好拟合实际分布。`}
+              : `约 ${(params.cheaterRatio * 100).toFixed(1)}% 的玩家通过小号送分获得额外胜场。`}
           </p>
+
+          {params.cheaterRatio > 0 && (
+            <div className="space-y-1 mt-2">
+              <Label className="text-xs font-medium text-gray-500">
+                送分额外胜场
+                <span className="ml-2 text-base font-semibold text-gray-900">
+                  +{params.cheaterBoost}
+                </span>
+              </Label>
+              <Slider
+                min={4}
+                max={24}
+                step={1}
+                value={[params.cheaterBoost]}
+                onValueChange={([v]) => update({ cheaterBoost: v })}
+                aria-label="送分额外胜场"
+              />
+              <p className="text-xs text-gray-400">
+                被送分者平均多赢的场数。参考值：普通送分 ~8，极端送分 ~18。
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

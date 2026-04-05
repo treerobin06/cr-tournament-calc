@@ -19,7 +19,7 @@ function App() {
 
   const distribution = useMemo(() => {
     const { rFull, alpha } = paramsToMathArgs(params)
-    return computeDistribution(rFull, playerCount, alpha, params.cheaterRatio, 12)
+    return computeDistribution(rFull, playerCount, alpha, params.cheaterRatio, params.cheaterBoost)
   }, [params, playerCount])
 
   // 找到目标排名对应的胜场数（用于图表标注）
